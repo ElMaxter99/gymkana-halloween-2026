@@ -52,6 +52,19 @@ alter table players enable row level security;
 alter table qr_points enable row level security;
 alter table scan_events enable row level security;
 
+-- Defensa en profundidad: además de RLS sin políticas, se retiran los permisos
+-- que Supabase concede por defecto a los roles públicos (anon/authenticated).
+do $$
+declare r text;
+begin
+  foreach r in array array['anon', 'authenticated'] loop
+    if exists (select 1 from pg_roles where rolname = r) then
+      execute format('revoke all on teams, players, qr_points, scan_events from %I', r);
+      execute format('revoke all on sequence scan_events_id_seq from %I', r);
+    end if;
+  end loop;
+end $$;
+
 -- Puntos de ejemplo (puedes editarlos o crear más desde /admin/qr)
 insert into qr_points (slug, title, instructions, sort_order) values
   ('calabaza-x7k9mq', 'La calabaza maldita', 'Habéis encontrado la calabaza maldita 🎃' || chr(10) || 'Haced una foto de todo el equipo poniendo vuestra mejor cara de miedo y mandadla por WhatsApp al coordinador.', 1),

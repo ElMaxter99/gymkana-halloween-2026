@@ -2,6 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { db } from "./supabase";
 import { sha256 } from "./crypto";
+import { SLUG_RE } from "./validation";
 
 export const DEVICE_COOKIE = "gk_device";
 export const DEVICE_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
@@ -39,6 +40,6 @@ export async function getCurrentPlayer(): Promise<CurrentPlayer | null> {
 
 /** Solo se permiten redirecciones internas a páginas de QR. */
 export function safeNext(next: string | null | undefined): string | null {
-  if (!next) return null;
-  return /^\/p\/[a-z0-9-]{3,64}$/.test(next) ? next : null;
+  if (!next || !next.startsWith("/p/")) return null;
+  return SLUG_RE.test(next.slice(3)) ? next : null;
 }

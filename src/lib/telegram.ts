@@ -1,5 +1,5 @@
 import "server-only";
-import { formatTime } from "./format";
+import { formatHourMinute } from "./format";
 
 /** Envía un aviso a Telegram. Nunca lanza: si falla, el escaneo ya está guardado. */
 export async function notifyTelegram(text: string): Promise<void> {
@@ -15,19 +15,36 @@ export async function notifyTelegram(text: string): Promise<void> {
       signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) {
-      console.error("Telegram error", res.status, await res.text());
+      // No se registra el cuerpo ni la URL: contiene el token del bot.
+      console.error(`Telegram respondió ${res.status}`);
     }
   } catch (err) {
-    console.error("Telegram error", err);
+    console.error("Telegram no disponible:", err instanceof Error ? err.name : "error");
   }
 }
 
-export function scanMessage(player: string, team: string, point: string, at: string): string {
-  return `👻 ${player} (${team}) ha escaneado «${point}» · ${formatTime(at)}`;
+export function scanMessage(scan: {
+  player: string;
+  team: string;
+  point: string;
+  at: string;
+  teamScansOfPoint: number;
+}): string {
+  const lines = [
+    "🎃 NUEVO ESCANEO",
+    `👥 Equipo: ${scan.team}`,
+    `🧙 Jugador: ${scan.player}`,
+    `📍 Punto: ${scan.point}`,
+    `🕒 Hora: ${formatHourMinute(scan.at)}`,
+  ];
+  if (scan.teamScansOfPoint > 1) {
+    lines.push(`🔁 Repetido: ${scan.teamScansOfPoint}.º escaneo del equipo en este punto`);
+  }
+  return lines.join("\n");
 }
 
 export function joinMessage(player: string, team: string, created: boolean): string {
   return created
-    ? `🎃 ${player} ha creado el equipo «${team}»`
-    : `🦇 ${player} se ha unido al equipo «${team}»`;
+    ? `🕯️ NUEVO EQUIPO\n👥 Equipo: ${team}\n🧙 Creado por: ${player}`
+    : `🦇 NUEVO JUGADOR\n👥 Equipo: ${team}\n🧙 Jugador: ${player}`;
 }

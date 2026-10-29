@@ -33,6 +33,17 @@ RLS activado en todo y sin políticas → solo el servidor (service role) accede
 - [x] Gestión de puntos QR e impresión de códigos en `/admin/qr`
 - [x] Avisos de Telegram (registro, unión y escaneo)
 
+### Fase 1b — Identidad visual y mejoras ✅
+- [x] Estética de las hojas impresas: pergamino, sellos de lacre, rojo sangre, oro envejecido, adornos SVG
+- [x] Portada con «Crear equipo» / «Unirme» / «Cómo se juega» y acceso discreto al panel
+- [x] Pantalla de equipo (`/equipo`): jugadores, escaneos, QR distintos, actividad
+- [x] Página de QR con sello de registro, hora del servidor y aviso de escaneo repetido
+- [x] Panel: filtros por equipo/jugador/punto, marca «1.º», indicador en directo, vista móvil apilada
+- [x] Anti-duplicados (móvil ya registrado, baja con «No soy yo») y límites `MAX_TEAMS` / `MAX_PLAYERS_PER_TEAM`
+- [x] Telegram con el formato «🎃 NUEVO ESCANEO …»
+- [x] Cabeceras de seguridad y `revoke` de permisos públicos en el esquema
+- [x] Pruebas: 33 comprobaciones HTTP + recorrido en Chromium (móvil y escritorio) contra un doble de PostgREST
+
 ### Fase 2 — Configuración (pendiente, Álvaro)
 - [ ] Crear proyecto Supabase y ejecutar `supabase/schema.sql`
 - [ ] Crear bot de Telegram y obtener `TELEGRAM_CHAT_ID`
@@ -64,6 +75,7 @@ RLS activado en todo y sin políticas → solo el servidor (service role) accede
 | Vuelve a abrir el mismo QR | Se guarda otro escaneo |
 | QR inexistente o desactivado | Página «Aquí no hay nada…» |
 | Telegram caído | El escaneo se guarda igual |
+| Móvil ya registrado intenta registrarse otra vez | Se rechaza; debe pulsar «No soy yo» |
 | `/admin` sin sesión | Redirige a `/admin/login` |
 | `/api/admin/overview` sin sesión | 401 |
 

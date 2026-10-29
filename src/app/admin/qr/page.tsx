@@ -36,13 +36,13 @@ export default async function QrAdminPage() {
   ].map(async (c) => ({ ...c, image: await qr(c.url) })));
 
   return (
-    <main className="page-wide">
-      <div className="toolbar no-print">
-        <h1>🔳 Puntos QR</h1>
+    <main className="page-wide admin">
+      <header className="admin-header no-print">
+        <h1>Puntos QR</h1>
         <nav><Link href="/admin">← Volver al panel</Link></nav>
-      </div>
+      </header>
 
-      <section className="card no-print">
+      <section className="panel no-print">
         <h2>Nuevo punto QR</h2>
         <form action={createPoint}>
           <label htmlFor="new-title">Título</label>
@@ -57,24 +57,24 @@ export default async function QrAdminPage() {
         </form>
       </section>
 
-      <section className="card no-print">
+      <section className="panel no-print">
         <h2>Editar puntos</h2>
         {(points ?? []).map((p) => (
           <details key={p.id}>
             <summary>
-              {p.title} {!p.active && <span className="muted">(desactivado)</span>}
+              {p.title} {!p.active && <span className="tag tag--off">desactivado</span>}
               <span className="muted small"> — /p/{p.slug}</span>
             </summary>
             <form action={updatePoint}>
               <input type="hidden" name="id" value={p.id} />
-              <label>Título</label>
-              <input name="title" defaultValue={p.title} maxLength={80} required />
-              <label>Instrucciones</label>
-              <textarea name="instructions" defaultValue={p.instructions} maxLength={4000} />
-              <label>Orden</label>
-              <input name="sort_order" type="number" defaultValue={p.sort_order} />
+              <label htmlFor={`title-${p.id}`}>Título</label>
+              <input id={`title-${p.id}`} name="title" defaultValue={p.title} maxLength={80} required />
+              <label htmlFor={`instr-${p.id}`}>Instrucciones</label>
+              <textarea id={`instr-${p.id}`} name="instructions" defaultValue={p.instructions} maxLength={4000} />
+              <label htmlFor={`order-${p.id}`}>Orden</label>
+              <input id={`order-${p.id}`} name="sort_order" type="number" defaultValue={p.sort_order} />
               <label>
-                <input type="checkbox" name="active" defaultChecked={p.active} style={{ width: "auto", marginRight: 8 }} />
+                <input type="checkbox" name="active" defaultChecked={p.active} />
                 Activo
               </label>
               <p className="muted small">El slug no se puede cambiar para no invalidar QR ya impresos.</p>
@@ -84,10 +84,13 @@ export default async function QrAdminPage() {
         ))}
       </section>
 
-      <div className="toolbar no-print">
+      <section className="panel no-print">
         <h2>QR para imprimir</h2>
-        <p className="muted small">Usa «Imprimir» del navegador. Comprueba antes que la URL es la del dominio definitivo.</p>
-      </div>
+        <p className="muted small">
+          Usa «Imprimir» del navegador: solo se imprimen las tarjetas. Comprueba antes que la URL es la del dominio
+          definitivo. Los QR desactivados no aparecen.
+        </p>
+      </section>
       <div className="qr-grid">
         {cards.filter((c) => c.active).map((c) => (
           <div key={c.key} className="qr-card">

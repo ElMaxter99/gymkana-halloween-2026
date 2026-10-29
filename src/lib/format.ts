@@ -19,3 +19,7 @@ export function formatDateTime(iso: string, timeZone = TIMEZONE): string {
     second: "2-digit",
   }).format(new Date(iso));
 }
+
+export function formatHourMinute(iso: string, timeZone = TIMEZONE): string {
+  return new Intl.DateTimeFormat("es-ES", { timeZone, hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
+}
