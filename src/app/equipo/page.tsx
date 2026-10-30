@@ -6,7 +6,7 @@ import { formatTime } from "@/lib/format";
 import { qrGoal } from "@/lib/validation";
 import { countPointsOnRoute } from "@/lib/overview";
 import { TeamBanner } from "@/components/ui";
-import { ArrowLeftIcon, Divider, EnvelopeIcon, SkullCrossbones } from "@/components/ornaments";
+import { ArrowLeftIcon, Divider, EnvelopeIcon, SkullCrossbones, TrophyIcon } from "@/components/ornaments";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +54,7 @@ export default async function TeamPage() {
         </Link>
       </div>
 
-      <TeamBanner playerName={player.displayName} teamName={player.teamName} />
+      <TeamBanner playerName={player.displayName} teamName={player.teamName} teamSlug={player.teamSlug} />
 
       <section className="parchment" aria-labelledby="stats-title">
         <h2 id="stats-title">Vuestro grimorio</h2>
@@ -121,6 +121,9 @@ export default async function TeamPage() {
 
       <Link className="button btn-seal" href="/sobres">
         <EnvelopeIcon /> Vuestros sobres
+      </Link>
+      <Link className="button btn-wood" href="/marcador">
+        <TrophyIcon /> Marcador en vivo
       </Link>
       <Link className="button btn-wood" href="/reglas">
         <SkullCrossbones size={26} /> Reglas de la gincana

@@ -20,7 +20,11 @@ export default async function EnvelopePreviewPage({
   const envelope = getEnvelope(Number((await params).n));
   if (!envelope) notFound();
 
-  const { data: teams, error } = await db().from("teams").select("id, name").order("created_at");
+  const { data: teams, error } = await db()
+    .from("teams")
+    .select("id, name, slug")
+    .order("sort_order")
+    .order("created_at");
   if (error) throw error;
   const wanted = (await searchParams).equipo;
   const team = (teams ?? []).find((t) => t.id === wanted) ?? teams?.[0];
@@ -41,7 +45,7 @@ export default async function EnvelopePreviewPage({
           </Link>
         ))}
       </nav>
-      <EnvelopeView envelope={envelope} teamName={team.name} scannedQr={scanned} />
+      <EnvelopeView envelope={envelope} teamName={team.name} teamSlug={team.slug} scannedQr={scanned} />
     </main>
   );
 }

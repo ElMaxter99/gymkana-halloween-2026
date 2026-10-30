@@ -12,6 +12,7 @@ export type CurrentPlayer = {
   displayName: string;
   teamId: string;
   teamName: string;
+  teamSlug: string | null;
 };
 
 /** Devuelve el jugador asociado a la cookie de este dispositivo, o null. */
@@ -21,13 +22,13 @@ export async function getCurrentPlayer(): Promise<CurrentPlayer | null> {
 
   const { data, error } = await db()
     .from("players")
-    .select("id, display_name, team_id, active, team:teams!inner(name, active)")
+    .select("id, display_name, team_id, active, team:teams!inner(name, slug, active)")
     .eq("device_token_hash", sha256(token))
     .maybeSingle();
 
   if (error) throw error;
   if (!data || !data.active) return null;
-  const team = data.team as unknown as { name: string; active: boolean };
+  const team = data.team as unknown as { name: string; slug: string | null; active: boolean };
   if (!team.active) return null;
 
   return {
@@ -35,6 +36,7 @@ export async function getCurrentPlayer(): Promise<CurrentPlayer | null> {
     displayName: data.display_name,
     teamId: data.team_id,
     teamName: team.name,
+    teamSlug: team.slug,
   };
 }
 

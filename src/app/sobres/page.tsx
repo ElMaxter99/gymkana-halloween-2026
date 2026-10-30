@@ -21,7 +21,7 @@ export default async function EnvelopesPage() {
           <ArrowLeftIcon size={20} /> Portada
         </Link>
       </div>
-      <TeamBanner playerName={player.displayName} teamName={player.teamName} />
+      <TeamBanner playerName={player.displayName} teamName={player.teamName} teamSlug={player.teamSlug} />
       <h1 className="title page-title center">
         Vuestros <span className="accent">sobres</span>
       </h1>

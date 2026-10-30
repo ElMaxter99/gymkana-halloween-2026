@@ -94,6 +94,8 @@ export default function Dashboard({ initial, timeZone }: { initial: Overview; ti
       <header className="admin-header">
         <h1>Panel del coordinador</h1>
         <nav>
+          <Link href="/admin/puntos">Puntuar</Link>
+          <Link href="/marcador" target="_blank">Marcador</Link>
           <Link href="/admin/equipos">Equipos y códigos</Link>
           <Link href="/admin/sobres">Sobres</Link>
           <Link href="/admin/partidas">Partidas</Link>

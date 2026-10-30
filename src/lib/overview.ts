@@ -60,7 +60,7 @@ export async function getOverview(): Promise<Overview> {
   const supabase = db();
 
   const [teamsRes, playersRes, pointsRes, recentRes, allRes] = await Promise.all([
-    supabase.from("teams").select("id, name, created_at").order("created_at"),
+    supabase.from("teams").select("id, name, created_at").order("sort_order").order("created_at"),
     supabase.from("players").select("id, display_name, team_id, created_at, active").order("created_at"),
     supabase
       .from("qr_points")

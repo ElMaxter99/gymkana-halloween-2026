@@ -67,10 +67,13 @@ export function EnvelopeTitle({ envelope }: { envelope: Envelope }) {
 export default function EnvelopeView({
   envelope,
   teamName,
+  teamSlug,
   scannedQr = new Set(),
 }: {
   envelope: Envelope;
   teamName: string;
+  /** Clave fija del equipo (rutas y mapa); si falta, se deduce del nombre. */
+  teamSlug?: string | null;
   scannedQr?: Set<string>;
 }) {
   const t = (text: string) => personalize(text, teamName);
@@ -101,7 +104,7 @@ export default function EnvelopeView({
         </section>
       ))}
 
-      {envelope.map && <TeamRoute teamName={teamName} scannedQr={scannedQr} />}
+      {envelope.map && <TeamRoute teamName={teamName} teamSlug={teamSlug} scannedQr={scannedQr} />}
 
       {envelope.callouts.map((c, i) =>
         c.kind === "final" ? (
@@ -126,8 +129,16 @@ export default function EnvelopeView({
   );
 }
 
-function TeamRoute({ teamName, scannedQr }: { teamName: string; scannedQr: Set<string> }) {
-  const key = teamKey(teamName);
+function TeamRoute({
+  teamName,
+  teamSlug,
+  scannedQr,
+}: {
+  teamName: string;
+  teamSlug?: string | null;
+  scannedQr: Set<string>;
+}) {
+  const key = teamSlug ?? teamKey(teamName);
   const route = ROUTES[key];
   const map = MAPS[key] ?? mapaTodos;
 

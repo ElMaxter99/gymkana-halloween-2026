@@ -20,18 +20,32 @@ export function checkAdminPassword(password: string): boolean {
   return safeEqual(password, expected);
 }
 
-export function createAdminSession(): string {
+/** Sesión firmada: «caducidad.nombre.firma». El nombre (opcional) aparece en el historial del marcador. */
+export function createAdminSession(name = ""): string {
   const exp = String(Math.floor(Date.now() / 1000) + ADMIN_SESSION_SECONDS);
-  return `${exp}.${hmac(exp, secret())}`;
+  const who = Buffer.from(name.slice(0, 40), "utf8").toString("base64url");
+  return `${exp}.${who}.${hmac(`${exp}.${who}`, secret())}`;
+}
+
+type AdminSession = { name: string };
+
+async function readSession(): Promise<AdminSession | null> {
+  const value = (await cookies()).get(ADMIN_COOKIE)?.value;
+  if (!value) return null;
+  const [exp, who, sig] = value.split(".");
+  if (!exp || who === undefined || !sig) return null;
+  if (Number(exp) < Date.now() / 1000) return null;
+  if (!safeEqual(sig, hmac(`${exp}.${who}`, secret()))) return null;
+  return { name: Buffer.from(who, "base64url").toString("utf8") };
 }
 
 export async function isAdmin(): Promise<boolean> {
-  const value = (await cookies()).get(ADMIN_COOKIE)?.value;
-  if (!value) return false;
-  const [exp, sig] = value.split(".");
-  if (!exp || !sig) return false;
-  if (Number(exp) < Date.now() / 1000) return false;
-  return safeEqual(sig, hmac(exp, secret()));
+  return (await readSession()) !== null;
+}
+
+/** Nombre del organizador para el historial («organizador» si no lo escribió al entrar). */
+export async function getAdminName(): Promise<string> {
+  return (await readSession())?.name.trim() || "organizador";
 }
 
 /** Para páginas y server actions: redirige al login si no hay sesión. */

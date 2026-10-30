@@ -6,11 +6,11 @@ import { useRouter } from "next/navigation";
 import { ErrorAlert, SuccessSeal, TeamBanner } from "@/components/ui";
 import { Divider, QrIcon, TeamEmblem, UsersIcon } from "@/components/ornaments";
 
-export type TeamOption = { id: string; name: string; requiresCode: boolean };
+export type TeamOption = { id: string; name: string; slug: string | null; requiresCode: boolean };
 type Props = {
   teams: TeamOption[];
   next: string | null;
-  current: { playerName: string; teamName: string } | null;
+  current: { playerName: string; teamName: string; teamSlug?: string | null } | null;
 };
 
 export default function RegistroForm({ teams, next, current }: Props) {
@@ -73,7 +73,7 @@ export default function RegistroForm({ teams, next, current }: Props) {
         router.replace(next);
         return;
       }
-      setIdentity({ playerName: data.playerName, teamName: data.teamName });
+      setIdentity({ playerName: data.playerName, teamName: data.teamName, teamSlug: selected?.slug });
       setJustRegistered(true);
       router.refresh();
     } catch {
@@ -86,7 +86,7 @@ export default function RegistroForm({ teams, next, current }: Props) {
   if (identity) {
     return (
       <>
-        <TeamBanner playerName={identity.playerName} teamName={identity.teamName} />
+        <TeamBanner playerName={identity.playerName} teamName={identity.teamName} teamSlug={identity.teamSlug} />
         <section className="parchment">
           {justRegistered ? (
             <SuccessSeal title="¡Ya estás dentro!">Tu móvil ya está vinculado a tu equipo.</SuccessSeal>
@@ -151,7 +151,7 @@ export default function RegistroForm({ teams, next, current }: Props) {
                   }}
                 />
                 <span className="team-option__card">
-                  <span className="team-option__emblem"><TeamEmblem name={t.name} size={48} /></span>
+                  <span className="team-option__emblem"><TeamEmblem name={t.name} slug={t.slug} size={48} /></span>
                   <span className="team-option__name">{t.name}</span>
                 </span>
               </label>

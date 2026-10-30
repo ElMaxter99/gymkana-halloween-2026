@@ -12,8 +12,9 @@ export default async function RegistroPage({ searchParams }: { searchParams: Pro
 
   const { data, error } = await db()
     .from("teams")
-    .select("id, name, join_code_hash")
+    .select("id, name, slug, join_code_hash")
     .eq("active", true)
+    .order("sort_order")
     .order("created_at");
   if (error) throw error;
 
@@ -21,6 +22,7 @@ export default async function RegistroPage({ searchParams }: { searchParams: Pro
   const teams: TeamOption[] = (data ?? []).map((t) => ({
     id: t.id,
     name: t.name,
+    slug: t.slug,
     requiresCode: Boolean(t.join_code_hash),
   }));
 
@@ -41,7 +43,9 @@ export default async function RegistroPage({ searchParams }: { searchParams: Pro
       <RegistroForm
         teams={teams}
         next={next}
-        current={player ? { playerName: player.displayName, teamName: player.teamName } : null}
+        current={
+          player ? { playerName: player.displayName, teamName: player.teamName, teamSlug: player.teamSlug } : null
+        }
       />
     </main>
   );

@@ -11,7 +11,9 @@ export default async function TeamsAdminPage() {
 
   const supabase = db();
   const [teamsRes, playersRes] = await Promise.all([
-    supabase.from("teams").select("id, name, join_code, join_code_hash, locked_until, active").order("created_at"),
+    supabase.from("teams").select("id, name, slug, join_code, join_code_hash, locked_until, active")
+      .order("sort_order")
+      .order("created_at"),
     supabase.from("players").select("team_id").eq("active", true),
   ]);
   if (teamsRes.error) throw teamsRes.error;
@@ -60,7 +62,7 @@ export default async function TeamsAdminPage() {
                 <tr key={t.id}>
                   <td className="team">
                     <span className="team-heading">
-                      <TeamEmblem name={t.name} size={24} /> {t.name}
+                      <TeamEmblem name={t.name} slug={t.slug} size={24} /> {t.name}
                     </span>
                     {!t.active && <span className="tag tag--off">desactivado</span>}
                   </td>
@@ -85,7 +87,7 @@ export default async function TeamsAdminPage() {
           <section key={t.id} className="panel" aria-labelledby={`team-${t.id}`}>
             <h2 id={`team-${t.id}`}>
               <span className="team-heading">
-                <TeamEmblem name={t.name} size={32} /> {t.name}
+                <TeamEmblem name={t.name} slug={t.slug} size={32} /> {t.name}
               </span>
               {!t.active && <span className="tag tag--off">desactivado</span>}
             </h2>
