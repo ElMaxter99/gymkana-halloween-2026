@@ -1063,11 +1063,6 @@ label.confirm input { flex: 0 0 auto; margin-top: 2px; }
 .sb-breakdown div { flex: 1 1 auto; min-width: 54px; padding: 3px 6px; text-align: center; background: rgba(89, 51, 34, 0.1); border-radius: 4px; }
 .sb-breakdown dt { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--muted-light); }
 .sb-breakdown dd { margin: 0; font-weight: 800; }
-.sb-pick { border: 0; padding: 0; margin: 6px 0 0; }
-.sb-pick legend { font-weight: 700; margin-bottom: 6px; color: var(--muted-dark); }
-.sb-pick div { display: flex; flex-wrap: wrap; gap: 8px; }
-.sb-pick button { color: var(--cream); background: var(--ink-2); box-shadow: inset 0 0 0 1px var(--line-dark); }
-.sb-pick button[aria-pressed="true"] { color: var(--ink); background: var(--pumpkin); box-shadow: none; }
 .sb-feed-card h2 { margin-bottom: 8px; }
 .sb-feed { list-style: none; margin: 0; padding: 0; }
 .sb-feed li { display: grid; grid-template-columns: 30px 1fr auto auto; gap: 8px; align-items: center; padding: 7px 0; border-bottom: 1px dashed rgba(89, 51, 34, 0.4); }

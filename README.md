@@ -120,7 +120,7 @@ Una web móvil que acompaña a una gincana de Halloween que se juega en papel: e
   - animación al subir o bajar de puesto y puntos por actividad;
   - «Lo último» («Bruja completó La Harley +2»);
   - pantalla siempre encendida (Wake Lock).
-- **`/marcador`**: lo mismo en el móvil, con «¿Cuál es tu equipo?» para resaltarlo.
+- **`/marcador`**: lo mismo en el móvil. Si el jugador está registrado, su equipo aparece resaltado automáticamente.
 - Se actualizan solos en cuanto el organizador marca algo y se reconectan solos. Detalles en **[docs/MARCADOR.md](docs/MARCADOR.md)**.
 
 ### Para el organizador (`/admin`)
@@ -327,7 +327,7 @@ Ejecutadas el 30/10/2026 sobre el build de producción (`next build` + `next sta
   - `anon` no puede leer las tablas ni ejecutar las funciones.
 - **39 comprobaciones de punta a punta del marcador** con panel, TV (1920×1080 y 1280×720) y móvil abiertos a la vez:
   - la TV y el móvil se actualizan **sin recargar**: en local, por sondeo, en 3–4 s;
-  - reordenación con animación, empates en el 2.º puesto, «mi equipo» recordado;
+  - reordenación con animación, empates en el 2.º puesto, equipo del jugador registrado resaltado;
   - deshacer, notas, «más creativa», extras ±, QR → pendiente → válido;
   - recálculo al cambiar puntos, renombrar equipo, historial con nombre;
   - nueva partida y restaurar, reinicio con confirmación, API pública sin notas ni motivos;

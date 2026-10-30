@@ -6,8 +6,6 @@ import type { PublicScoreboard } from "@/lib/scoreboard";
 import { useLiveScoreboard, type LiveStatus } from "@/lib/useLiveScoreboard";
 import { TeamEmblem, WaxSeal } from "./ornaments";
 
-const MY_TEAM_KEY = "gk-mi-equipo";
-
 const STATUS_TEXT: Record<LiveStatus, string> = {
   live: "En directo",
   polling: "Actualización automática",
@@ -128,32 +126,12 @@ export default function LiveScoreboard({
 }: {
   initial: PublicScoreboard;
   mode: "tv" | "mobile";
-  /** Equipo del jugador identificado en este móvil (para resaltarlo por defecto). */
+  /** Equipo del jugador registrado en este móvil: se resalta en el marcador. */
   playerTeamId?: string | null;
 }) {
   const { data, status } = useLiveScoreboard(initial);
   const { ref, moves } = useRankAnimation(data.teams);
-  const [myTeam, setMyTeam] = useState<string | null>(playerTeamId);
-
-  useEffect(() => {
-    if (mode !== "mobile" || playerTeamId) return;
-    try {
-      const saved = localStorage.getItem(MY_TEAM_KEY);
-      if (saved) setMyTeam(saved);
-    } catch {
-      /* sin almacenamiento: no pasa nada */
-    }
-  }, [mode, playerTeamId]);
-
-  function chooseTeam(id: string | null) {
-    setMyTeam(id);
-    try {
-      if (id) localStorage.setItem(MY_TEAM_KEY, id);
-      else localStorage.removeItem(MY_TEAM_KEY);
-    } catch {
-      /* sin almacenamiento */
-    }
-  }
+  const myTeam = playerTeamId;
 
   if (mode === "tv") return <TvBoard data={data} status={status} rowRef={ref} moves={moves} />;
 
@@ -212,23 +190,6 @@ export default function LiveScoreboard({
           </li>
         ))}
       </ol>
-
-      <fieldset className="sb-pick">
-        <legend>¿Cuál es tu equipo?</legend>
-        <div>
-          {data.teams.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              className="inline"
-              aria-pressed={t.id === myTeam}
-              onClick={() => chooseTeam(t.id === myTeam ? null : t.id)}
-            >
-              <TeamEmblem name={t.name} slug={t.slug} size={22} /> {t.name}
-            </button>
-          ))}
-        </div>
-      </fieldset>
 
       <section className="parchment sb-feed-card" aria-labelledby="feed-title">
         <h2 id="feed-title">Lo último</h2>
