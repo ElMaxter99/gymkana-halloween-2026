@@ -11,7 +11,7 @@ Sistema de puntuación de la gincana:
 | `/admin/puntos/historial` | Organizador | Quién cambió qué y cuándo; deshacer |
 | `/admin/puntos/config` | Organizador | Nombres de equipos, pruebas, puntos, bonus; reiniciar |
 | `/tv` | Público (sin login) | Pantalla grande: clasificación animada y actividad reciente |
-| `/marcador` | Público (sin login) | Lo mismo adaptado al móvil, con «mi equipo» resaltado |
+| `/marcador` | Público (sin login) | Lo mismo adaptado al móvil; el equipo del jugador registrado aparece resaltado |
 | `/api/marcador` | Público (solo lectura) | Los datos públicos del marcador en JSON |
 
 ## 1. Cómo funciona
