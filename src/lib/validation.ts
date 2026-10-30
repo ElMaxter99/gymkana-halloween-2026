@@ -1,6 +1,9 @@
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const SLUG_RE = /^[a-z0-9-]{3,64}$/;
 
+/** Códigos de equipo: solo cifras, para que el móvil saque el teclado numérico. */
+export const TEAM_CODE_RE = /^\d{4,8}$/;
+
 export function isUuid(value: unknown): value is string {
   return typeof value === "string" && UUID_RE.test(value);
 }

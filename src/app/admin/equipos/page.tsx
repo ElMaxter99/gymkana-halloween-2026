@@ -2,12 +2,14 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/admin-auth";
 import { db } from "@/lib/supabase";
 import { TeamEmblem } from "@/components/ornaments";
+import { TEAM_CODE_RE } from "@/lib/validation";
 import { clearTeamCode, setTeamActive, setTeamCode } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function TeamsAdminPage() {
+export default async function TeamsAdminPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   await requireAdmin();
+  const { error: formError } = await searchParams;
 
   const supabase = db();
   const [teamsRes, playersRes] = await Promise.all([
@@ -36,6 +38,14 @@ export default async function TeamsAdminPage() {
           <Link href="/admin">← Volver al panel</Link>
         </nav>
       </header>
+
+      {formError && (
+        <div className="alert alert--error" role="alert">
+          <span>
+            <b>Error:</b> {formError}
+          </span>
+        </div>
+      )}
 
       <section className="panel">
         <p className="muted small" style={{ margin: 0 }}>
@@ -111,14 +121,20 @@ export default async function TeamsAdminPage() {
                 id={`code-${t.id}`}
                 defaultValue={t.join_code ?? ""}
                 name="code"
+                inputMode="numeric"
+                pattern="\d{4,8}"
+                title="Solo cifras, de 4 a 8"
                 minLength={4}
-                maxLength={40}
+                maxLength={8}
                 required
                 autoComplete="off"
-                autoCapitalize="none"
-                spellCheck={false}
-                placeholder="Mínimo 4 caracteres"
+                placeholder="De 4 a 8 cifras"
               />
+              {t.join_code && !TEAM_CODE_RE.test(t.join_code) && (
+                <p className="small" style={{ color: "var(--pumpkin)", margin: "6px 0 0" }}>
+                  Este código tiene letras: cámbialo por uno de cifras para que los jugadores vean el teclado numérico.
+                </p>
+              )}
               <button type="submit">Guardar código</button>
             </form>
 

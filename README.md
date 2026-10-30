@@ -103,8 +103,9 @@ Una web móvil que acompaña a una gincana de Halloween que se juega en papel: e
 
 ### Para los jugadores
 
-- **Unirse a un equipo** con cuatro tarjetas grandes. El código solo se pide si el organizador se lo ha puesto a ese equipo.
+- **Unirse a un equipo** con cuatro tarjetas grandes. El código solo se pide si el organizador se lo ha puesto a ese equipo; es **numérico (4–8 cifras)**, así que el móvil abre directamente el teclado de números.
 - **Un móvil, una identidad.** No se puede registrar dos veces por error; «No soy yo» permite cambiar de equipo sin dejar duplicados.
+- **«Ya me registré»**: si un jugador cambia de móvil (sin batería, otro navegador…), elige su equipo, pone el código y toca su nombre. Conserva sus escaneos y el móvil anterior deja de estar identificado. La lista de nombres solo se ve con el código correcto.
 - **Sobres** (`/sobres`): sellados hasta que el organizador los abre y personalizados con el nombre, la inicial, la ruta y el mapa del equipo.
 - **QR** (`/p/<slug>`):
   - muestra el equipo, la prueba y el sello «Escaneo registrado» con la hora;
@@ -128,7 +129,7 @@ Una web móvil que acompaña a una gincana de Halloween que se juega en papel: e
 | Página | Para qué |
 |---|---|
 | Panel | Contadores, actividad en directo (cada 5 s) con filtros por equipo, jugador y punto, matriz de progreso con rutas, equipos y jugadores |
-| Equipos y códigos | Ver y editar el código de cada equipo, desbloquear tras intentos fallidos, activar o desactivar equipos |
+| Equipos y códigos | Ver y editar el código de cada equipo (solo cifras, de 4 a 8), desbloquear tras intentos fallidos, activar o desactivar equipos |
 | Sobres | Abrir o volver a sellar cada sobre y verlo como lo ve cualquier equipo |
 | Puntos QR | Textos de cada prueba, rutas (a qué equipos les toca), activar o desactivar e **imprimir los QR** |
 | **Puntuar** (`/admin/puntos`) | Validar cada prueba por equipo con una mano, bonus automáticos, «más creativa», extras, notas privadas y deshacer |

@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
 import { hashJoinCode } from "@/lib/crypto";
 import { db } from "@/lib/supabase";
-import { isUuid } from "@/lib/validation";
+import { TEAM_CODE_RE, isUuid } from "@/lib/validation";
+import { redirect } from "next/navigation";
 
 async function updateTeam(form: FormData, values: Record<string, unknown>) {
   await requireAdmin();
@@ -17,8 +18,11 @@ async function updateTeam(form: FormData, values: Record<string, unknown>) {
 
 /** Pone o cambia el código para unirse. También quita cualquier bloqueo por intentos fallidos. */
 export async function setTeamCode(form: FormData) {
-  const code = String(form.get("code") ?? "").trim().slice(0, 40);
-  if (code.length < 4) return;
+  const code = String(form.get("code") ?? "").replace(/\s+/g, "");
+  if (!TEAM_CODE_RE.test(code)) {
+    await requireAdmin();
+    redirect(`/admin/equipos?error=${encodeURIComponent("El código debe tener solo cifras (de 4 a 8)")}`);
+  }
   await updateTeam(form, {
     join_code: code,
     join_code_hash: hashJoinCode(code),
