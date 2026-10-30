@@ -95,6 +95,7 @@ export default function Dashboard({ initial, timeZone }: { initial: Overview; ti
         <h1>Panel del coordinador</h1>
         <nav>
           <Link href="/admin/equipos">Equipos y códigos</Link>
+          <Link href="/admin/sobres">Sobres</Link>
           <Link href="/admin/partidas">Partidas</Link>
           <Link href="/admin/qr">Puntos QR</Link>
           <button type="button" className="inline btn-ghost" onClick={logout}>

@@ -56,6 +56,12 @@ create table if not exists scan_events (
 create index if not exists scan_events_scanned_at_idx on scan_events(scanned_at desc);
 create index if not exists scan_events_team_point_idx on scan_events(team_id, qr_point_id);
 
+-- Sobres abiertos por el organizador (/admin/sobres). Si un sobre no está aquí, sigue sellado en la web.
+create table if not exists envelope_state (
+  envelope int primary key check (envelope between 0 and 99),
+  opened_at timestamptz not null default now()
+);
+
 -- Copias de partidas anteriores («Nueva partida» en /admin/partidas).
 create table if not exists game_archives (
   id bigint generated always as identity primary key,
@@ -100,6 +106,7 @@ begin
   -- «where true»: Supabase puede bloquear DELETE sin WHERE.
   delete from scan_events where true;
   delete from players where true;
+  delete from envelope_state where true; -- la partida nueva empieza con todos los sobres sellados
   update teams set failed_join_attempts = 0, locked_until = null where true;
   return v_id;
 end $$;
@@ -159,6 +166,7 @@ alter table players enable row level security;
 alter table qr_points enable row level security;
 alter table scan_events enable row level security;
 alter table game_archives enable row level security;
+alter table envelope_state enable row level security;
 
 -- Defensa en profundidad: además de RLS sin políticas, se retiran los permisos
 -- que Supabase concede por defecto a los roles públicos (anon/authenticated).
@@ -167,7 +175,7 @@ declare r text;
 begin
   foreach r in array array['anon', 'authenticated'] loop
     if exists (select 1 from pg_roles where rolname = r) then
-      execute format('revoke all on teams, players, qr_points, scan_events, game_archives from %I', r);
+      execute format('revoke all on teams, players, qr_points, scan_events, game_archives, envelope_state from %I', r);
       execute format('revoke all on function archive_game(text), restore_game(bigint) from %I', r);
       execute format('revoke all on sequence scan_events_id_seq, game_archives_id_seq from %I', r);
     end if;
@@ -196,6 +204,17 @@ where not exists (select 1 from qr_points q where q.title = v.title);
 update qr_points
 set slug = split_part(slug, '-', 1) || '-' || substr(md5(gen_random_uuid()::text), 1, 10)
 where slug in ('parkour-7qk2mz', 'rocodromo-x4b9tw', 'zigzag-m3v8pd', 'anfiteatro-h6r2kc');
+
+-- Rutas del mapa del muerto (qué equipos tienen cada QR). Solo se rellenan si están vacías:
+-- lo que cambies en /admin/qr no se pisa al volver a ejecutar el script.
+update qr_points q set assigned_team_ids = array(select id from teams where name in ('Calabaza', 'Bruja'))
+where q.slug like 'parkour-%' and q.assigned_team_ids is null;
+update qr_points q set assigned_team_ids = array(select id from teams where name in ('Calabaza', 'Zombie', 'Zombi'))
+where q.slug like 'rocodromo-%' and q.assigned_team_ids is null;
+update qr_points q set assigned_team_ids = array(select id from teams where name in ('Fantasma', 'Bruja'))
+where q.slug like 'zigzag-%' and q.assigned_team_ids is null;
+update qr_points q set assigned_team_ids = array(select id from teams where name in ('Fantasma', 'Zombie', 'Zombi'))
+where q.slug like 'anfiteatro-%' and q.assigned_team_ids is null;
 
 -- Elimina los QR de ejemplo de versiones anteriores del script (y sus escaneos de prueba).
 delete from qr_points where slug in ('calabaza-x7k9mq', 'cripta-b4n2vz', 'bruja-k8w3rt');
