@@ -22,12 +22,33 @@ export default async function QrAdminPage() {
   await requireAdmin();
   const base = await baseUrl();
 
-  const { data: points, error } = await db()
-    .from("qr_points")
-    .select("id, slug, title, instructions, sort_order, active")
-    .order("sort_order")
-    .order("created_at");
-  if (error) throw error;
+  const [pointsRes, teamsRes] = await Promise.all([
+    db()
+      .from("qr_points")
+      .select("id, slug, title, instructions, sort_order, active, assigned_team_ids")
+      .order("sort_order")
+      .order("created_at"),
+    db().from("teams").select("id, name").order("created_at"),
+  ]);
+  if (pointsRes.error) throw pointsRes.error;
+  if (teamsRes.error) throw teamsRes.error;
+  const points = pointsRes.data;
+  const teams = teamsRes.data ?? [];
+  const teamName = new Map(teams.map((t) => [t.id, t.name]));
+
+  // Casillas «¿a qué equipos les toca este QR?». Solo lo ve el organizador.
+  const routeFields = (prefix: string, assigned: string[] | null) => (
+    <fieldset className="route-picker">
+      <legend>Equipos que tienen este QR en su ruta</legend>
+      {teams.map((t) => (
+        <label key={t.id} className="confirm">
+          <input type="checkbox" name="teams" value={t.id} defaultChecked={assigned?.includes(t.id)} id={`${prefix}-${t.id}`} />
+          {t.name}
+        </label>
+      ))}
+      <span className="muted small">Sin marcar ninguno = sin asignar (el panel no avisará de escaneos fuera de ruta).</span>
+    </fieldset>
+  );
 
   const registroUrl = `${base}/registro`;
   const cards = await Promise.all([
@@ -53,6 +74,7 @@ export default async function QrAdminPage() {
           <input id="new-slug" name="slug" maxLength={64} placeholder="Vacío = se genera uno aleatorio" />
           <label htmlFor="new-order">Orden</label>
           <input id="new-order" name="sort_order" type="number" defaultValue={(points?.length ?? 0) + 1} />
+          {routeFields("new", null)}
           <button type="submit">Crear punto</button>
         </form>
       </section>
@@ -63,7 +85,13 @@ export default async function QrAdminPage() {
           <details key={p.id}>
             <summary>
               {p.title} {!p.active && <span className="tag tag--off">desactivado</span>}
-              <span className="muted small"> — /p/{p.slug}</span>
+              <span className="muted small">
+                {" "}
+                — /p/{p.slug} · ruta:{" "}
+                {p.assigned_team_ids?.length
+                  ? p.assigned_team_ids.map((id: string) => teamName.get(id) ?? "?").join(" · ")
+                  : "sin asignar"}
+              </span>
             </summary>
             <form action={updatePoint}>
               <input type="hidden" name="id" value={p.id} />
@@ -77,6 +105,7 @@ export default async function QrAdminPage() {
                 <input type="checkbox" name="active" defaultChecked={p.active} />
                 Activo
               </label>
+              {routeFields(p.id, p.assigned_team_ids)}
               <p className="muted small">El slug no se puede cambiar para no invalidar QR ya impresos.</p>
               <button type="submit">Guardar</button>
             </form>

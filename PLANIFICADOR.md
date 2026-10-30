@@ -51,7 +51,10 @@ RLS activado en todo y sin políticas → solo el servidor (service role) accede
 - [x] Página `/reglas` con la hoja de reglas (los retos de los sobres 0–4 no se publican)
 - [x] 4 ubicaciones con QR y textos de serie; objetivo de 2 por equipo (`QR_PER_TEAM`)
 - [x] `/admin/partidas`: guardar copia y empezar de cero, restaurar (con copia automática), descargas CSV/JSON
-- [ ] Sobre 3 · El mapa del muerto (fichas pendientes)
+- [x] Sobre 3 · El mapa del muerto: rutas por equipo editables en `/admin/qr` (no se guardan en el repositorio)
+- [x] Códigos de equipo visibles y editables en `/admin/equipos`
+- [x] URLs de QR aleatorias por base de datos (el repositorio es público)
+- [x] Guía de Telegram en `docs/TELEGRAM.md`
 
 ### Fase 2 — Configuración (pendiente, Álvaro)
 - [ ] Usar la clave SECRETA de Supabase (no la publicable) y volver a ejecutar `supabase/schema.sql`
@@ -62,7 +65,7 @@ RLS activado en todo y sin políticas → solo el servidor (service role) accede
 
 ### Fase 3 — Contenido (pendiente)
 - [x] Ubicaciones y textos de los QR (Parkour maldito, Rocódromo, Zigzag, El Anfiteatro)
-- [ ] Decidir qué 2 ubicaciones toca a cada equipo (fuera de la web)
+- [ ] Marcar en `/admin/qr` la ruta de cada QR según el mapa del muerto
 - [ ] Imprimir el QR de registro y los de cada punto desde el dominio definitivo
 
 ### Fase 4 — Ensayo general

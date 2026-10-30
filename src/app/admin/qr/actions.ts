@@ -4,6 +4,7 @@ import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
 import { db } from "@/lib/supabase";
+import { isUuid } from "@/lib/validation";
 
 function randomSlug(): string {
   const alphabet = "abcdefghijkmnpqrstuvwxyz23456789";
@@ -24,6 +25,12 @@ function field(form: FormData, name: string, max: number): string {
   return String(form.get(name) ?? "").trim().slice(0, max);
 }
 
+/** Equipos que tienen este QR en su ruta (casillas «teams»). Sin ninguno = sin asignar. */
+function assignedTeams(form: FormData): string[] | null {
+  const ids = [...new Set(form.getAll("teams").filter(isUuid))];
+  return ids.length ? ids : null;
+}
+
 export async function createPoint(form: FormData) {
   await requireAdmin();
   const title = field(form, "title", 80);
@@ -37,6 +44,7 @@ export async function createPoint(form: FormData) {
     slug,
     instructions: field(form, "instructions", 4000),
     sort_order: Number(form.get("sort_order")) || 0,
+    assigned_team_ids: assignedTeams(form),
   });
   if (error) throw new Error(error.code === "23505" ? "Ese slug ya existe" : error.message);
   revalidatePath("/admin/qr");
@@ -54,6 +62,7 @@ export async function updatePoint(form: FormData) {
       instructions: field(form, "instructions", 4000),
       sort_order: Number(form.get("sort_order")) || 0,
       active: form.get("active") === "on",
+      assigned_team_ids: assignedTeams(form),
     })
     .eq("id", id);
   if (error) throw new Error(error.message);

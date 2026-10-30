@@ -29,6 +29,7 @@ export function scanMessage(scan: {
   point: string;
   at: string;
   teamScansOfPoint: number;
+  offRoute?: boolean;
 }): string {
   const lines = [
     "🎃 NUEVO ESCANEO",
@@ -37,6 +38,9 @@ export function scanMessage(scan: {
     `📍 Punto: ${scan.point}`,
     `🕒 Hora: ${formatHourMinute(scan.at)}`,
   ];
+  if (scan.offRoute) {
+    lines.push("⚠️ Este QR no está en la ruta de su equipo");
+  }
   if (scan.teamScansOfPoint > 1) {
     lines.push(`🔁 Repetido: ${scan.teamScansOfPoint}.º escaneo del equipo en este punto`);
   }

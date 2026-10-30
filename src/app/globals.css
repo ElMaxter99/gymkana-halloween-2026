@@ -873,3 +873,14 @@ details ul { margin: 4px 0 8px; padding-left: 20px; }
 .alert--ok { color: #d9f5cf; background: rgba(63, 125, 50, 0.25); border: 2px solid #6fcf5a; }
 label.confirm { display: flex; gap: 10px; align-items: flex-start; font-weight: 600; color: var(--cream); }
 label.confirm input { flex: 0 0 auto; margin-top: 2px; }
+
+.route-picker { border: 1px solid var(--line-dark); border-radius: var(--radius); margin: 14px 0 0; padding: 8px 12px 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px 12px; }
+.route-picker legend { color: var(--muted-dark); font-size: 0.9rem; font-weight: 700; padding: 0 4px; }
+.route-picker label.confirm { margin: 0; }
+.route-picker .muted { grid-column: 1 / -1; }
+.cell-pending { color: var(--parchment); }
+.cell-offroute, .tag--offroute { color: #f2c14e; }
+.cell-na { color: var(--line-dark); }
+.team-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1.05rem; font-weight: 700; color: var(--cream); background: var(--ink); border: 1px solid var(--gold); border-radius: 4px; padding: 1px 8px; }
+.codes-table td { vertical-align: middle; }
+.alert--warn { color: #4a3200; background: #f8e3a8; border: 2px solid var(--gold); border-left-width: 6px; }

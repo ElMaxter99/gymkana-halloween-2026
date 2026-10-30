@@ -18,7 +18,7 @@ Cada equipo recibe un **sobre** con:
 | 0 · Un amigo es un tesoro | Retos con gente durante toda la noche | No (se abre en orden) |
 | 1 · La casa maldita | Objetos dentro de la casa | No |
 | 2 · Los objetos perdidos | Objetos fuera de la casa | No |
-| 3 · El mapa del muerto | Lleva a las ubicaciones con QR | Pendiente: fichas aún en preparación |
+| 3 · El mapa del muerto | Ficha del coordinador: lugares, rutas por equipo y QR | No. Las rutas se marcan en `/admin/qr` (solo las ve el organizador) |
 | 4 · El ritual | El último sobre | No |
 
 Los retos de los sobres **no se publican en la web** a propósito: se abren en orden y publicarlos destriparía el juego.
@@ -26,7 +26,7 @@ Los retos de los sobres **no se publican en la web** a propósito: se abren en o
 Cómo se usa la web:
 
 1. **Al empezar**, todos escanean el QR de registro, escriben su nombre y eligen su equipo: **Calabaza, Fantasma, Bruja o Zombie**. Si el organizador ha puesto código a ese equipo, lo escriben.
-2. **Durante la gincana** el juego es analógico. Hay 4 ubicaciones con QR (**Parkour maldito, Rocódromo, Zigzag y El Anfiteatro**) y **cada equipo tiene que encontrar 2**. Qué dos le tocan a cada equipo se decide fuera de la web, así que puede cambiarse a última hora.
+2. **Durante la gincana** el juego es analógico. Hay 4 ubicaciones con QR (**Parkour maldito, Rocódromo, Zigzag y El Anfiteatro**) y **cada equipo tiene que encontrar las 2 de su ruta**. Las rutas las marca el organizador en `/admin/qr` y se pueden cambiar a última hora.
 3. Al escanear un QR, la web muestra «Álvaro, perteneces al equipo Zombie», la prueba de esa ubicación y cuántas llevan («1 de 2»), y **registra el escaneo**.
 4. El equipo hace la prueba y la **envía por WhatsApp**. El organizador la valida y reparte los puntos en papel. *Si no hay foto o vídeo… no ha pasado.*
 5. El organizador lo ve todo **en directo** en su panel y recibe un aviso en **Telegram**.
@@ -50,8 +50,12 @@ Escanear un QR solo demuestra que alguien con esa sesión abrió esa URL; **no v
   - marca «1.º» en el primer escaneo de cada equipo en cada punto;
   - matriz de progreso con el objetivo de 2 ubicaciones por equipo;
   - lista de equipos y jugadores.
-- **Equipos y códigos** (`/admin/equipos`): poner, cambiar o quitar el código de cada equipo, ver bloqueos por intentos fallidos y activar o desactivar equipos.
-- **Puntos QR** (`/admin/qr`): editar textos, crear, activar o desactivar puntos e imprimir los QR.
+- **Equipos y códigos** (`/admin/equipos`): tabla **«Códigos de un vistazo»** con el código de cada equipo. Permite editar, poner o quitar códigos, ver bloqueos por intentos fallidos y activar o desactivar equipos.
+- **Puntos QR** (`/admin/qr`): editar textos y **rutas** (a qué equipos les toca cada QR), crear, activar o desactivar puntos e imprimir los QR.
+- **Rutas**:
+  - el panel muestra «pendiente», «no le toca» y «fuera de ruta»;
+  - los QR fuera de ruta no cuentan para el objetivo, y el jugador ve un aviso si escanea uno que no le toca;
+  - Telegram añade «⚠️» en esos escaneos.
 - **Partidas** (`/admin/partidas`):
   - **«Guardar copia y empezar partida nueva»** guarda jugadores y escaneos en una copia y deja la partida a cero;
   - **«Restaurar esta partida»** la vuelve a poner en juego tal cual;
@@ -61,9 +65,8 @@ Escanear un QR solo demuestra que alguien con esa sesión abrió esa URL; **no v
 
 ### Pendientes o fuera de alcance
 
-- Las fichas del **sobre 3 (El mapa del muerto)**.
 - Puntuaciones y clasificación: las reparte el organizador fuera de la web, como dicen las hojas.
-- La web no guarda qué ubicaciones tiene asignadas cada equipo (decisión del organizador). Solo cuenta cuántas ha encontrado.
+- Las ubicaciones de foto del mapa (Casa, Vito y Sara, La Harley, Vito gorra azul) no tienen QR y quedan fuera de la web.
 - No se suben fotos ni vídeos. Sin cobertura, el escaneo no se registra hasta recargar con conexión.
 
 ## 3. Stack
@@ -114,33 +117,35 @@ Todo el acceso a datos se hace en el servidor con la clave secreta de Supabase. 
 - Equipos fijos: **Calabaza 🎃, Fantasma 👻, Bruja 🧙 y Zombie 🧟**, creados por `schema.sql`. En la web cada uno tiene su emblema en SVG.
 - **El código es opcional y lo pone el organizador** en `/admin/equipos`; la idea es darlo en la hoja de cada equipo.
   - Sin código, cualquiera entra al equipo solo con elegirlo, y el panel lo marca en naranja.
-  - El código se guarda con **scrypt + sal** y no distingue mayúsculas.
+  - El código se ve y se edita en `/admin/equipos`. Se guarda legible (`join_code`, solo accesible desde el servidor) para que puedas consultarlo, y la comprobación usa su hash **scrypt + sal**. No distingue mayúsculas.
   - Tras **8 fallos seguidos** el equipo se bloquea **5 minutos**. Poner un código nuevo lo desbloquea.
 - Al registrarse, el móvil recibe una cookie `httpOnly` (`gk_device`, 30 días) con un token aleatorio. En la base de datos solo se guarda su hash SHA-256.
 - El navegador solo recibe el id, el nombre y si el equipo pide código; nunca hashes ni jugadores de otros equipos.
 - Límite de jugadores por equipo: `MAX_PLAYERS_PER_TEAM` (20). Los nombres se sanean en el servidor.
 
-## 6. Ubicaciones con QR
+## 6. Ubicaciones con QR y rutas
 
-| Ubicación | URL | Prueba de serie |
-|---|---|---|
-| Parkour maldito | `/p/parkour-7qk2mz` | Todo el equipo debe participar en un vídeo donde se realice parte del circuito de parkour. |
-| Rocódromo | `/p/rocodromo-x4b9tw` | Vídeo de un integrante del equipo completándolo o aguantando arriba 10 segundos. |
-| Zigzag | `/p/zigzag-m3v8pd` | Recorred el zigzag en fila como una procesión de zombis: cada uno agarrado a los hombros del de delante, arrastrando los pies y sin soltaros. Grabad un vídeo de todo el recorrido. |
-| El Anfiteatro | `/p/anfiteatro-h6r2kc` | Recread una escena de una película de terror. |
+| Ubicación | Prueba de serie |
+|---|---|
+| Parkour maldito | Todo el equipo debe participar en un vídeo donde se realice parte del circuito de parkour. |
+| Rocódromo | Vídeo de un integrante del equipo completándolo o aguantando arriba 10 segundos. |
+| Zigzag | Recorred el zigzag en fila como una procesión de zombis: cada uno agarrado a los hombros del de delante, arrastrando los pies y sin soltaros. Grabad un vídeo de todo el recorrido. |
+| El Anfiteatro | Recread una escena de una película de terror. |
 
-- Los textos se cambian en `/admin/qr`. Volver a ejecutar `schema.sql` no los pisa.
-- Objetivo por equipo: `QR_PER_TEAM` (2). Se muestra al jugador («1 de 2») y en el panel (✓ al completar).
+- **URLs secretas.** El script genera un sufijo aleatorio distinto en cada base de datos (`/p/parkour-3f9a1c…`), así que las URLs no están en este repositorio, que es **público**. Las URLs reales se ven en `/admin/qr`.
+- **Rutas.** No vienen precargadas, para no publicar el mapa en el repositorio: márcalas en `/admin/qr` → cada punto → «Equipos que tienen este QR en su ruta».
+  - Sin rutas marcadas, todo funciona igual, pero sin avisos de «fuera de ruta».
+- Los textos se cambian en `/admin/qr`. Volver a ejecutar `schema.sql` no pisa ni los textos ni las rutas.
+- **Objetivo por equipo:** `QR_PER_TEAM` (2). Se muestra al jugador («1 de 2») y en el panel (✓ al completar). Solo cuentan los QR de su ruta.
 - Al abrir la página, el servidor comprueba que el punto existe y está activo, identifica al jugador por su cookie e **inserta el escaneo con la hora del servidor**.
 - Si el jugador no está identificado, va a `/registro?next=/p/<slug>` y al terminar vuelve solo al QR. No hay redirecciones abiertas.
-- Las URLs están en este repositorio: si es público, alguien podría verlas. Para hacerlas secretas, crea los puntos desde `/admin/qr` (con sufijo aleatorio) y desactiva estos.
 
 ### Escaneos repetidos
 
 **Se guardan todos**: recargas y escaneos de varios móviles del mismo equipo incluidos.
 - El jugador ve si es la primera vez que su equipo registra ese QR.
 - El panel marca el primero con «1.º».
-- Telegram añade «🔁 Repetido».
+- Telegram añade «🔁 Repetido» (y «⚠️» si es fuera de ruta).
 - El progreso cuenta ubicaciones **distintas**.
 
 ## 7. Panel privado
@@ -168,10 +173,7 @@ Pensado para hacer varias partidas de prueba y que el día del evento todo esté
 
 ## 8. Telegram
 
-1. Habla con [@BotFather](https://t.me/BotFather), envía `/newbot` y copia el token.
-2. Escribe al bot (o añádelo a un grupo).
-3. Abre `https://api.telegram.org/bot<TOKEN>/getUpdates` y copia `chat.id`.
-4. Configura `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID`.
+Opcional. **Guía paso a paso (crear el bot, conseguir el chat id, grupos, Vercel y solución de problemas): [docs/TELEGRAM.md](docs/TELEGRAM.md).**
 
 ```
 🎃 NUEVO ESCANEO
@@ -181,15 +183,15 @@ Pensado para hacer varias partidas de prueba y que el día del evento todo esté
 🕒 Hora: 22:14
 ```
 
-El aviso se envía después de guardar el escaneo, con un límite de 5 s. Si Telegram falla o no está configurado, el juego sigue y en el log solo aparece el código de estado (nunca el token).
+El aviso se envía después de guardar el escaneo, con un límite de 5 s. Si Telegram falla o no está configurado, el juego sigue.
 
 ## 9. Modelo de datos (Supabase)
 
 | Tabla / función | Contenido |
 |---|---|
-| `teams` | `name`, `name_key` (único), `join_code_hash` (null = sin código), intentos fallidos, `locked_until`, `active` |
+| `teams` | `name`, `name_key` (único), `join_code` (visible para el organizador), `join_code_hash` (null = sin código), intentos fallidos, `locked_until`, `active` |
 | `players` | `display_name`, `team_id`, `device_token_hash` (único), `active` |
-| `qr_points` | `slug`, `title`, `instructions`, `sort_order`, `active` |
+| `qr_points` | `slug`, `title`, `instructions`, `sort_order`, `active`, `assigned_team_ids` (ruta) |
 | `scan_events` | `player_id`, `team_id`, `qr_point_id`, `scanned_at` (servidor), `user_agent` |
 | `game_archives` | `label`, `archived_at`, contadores y `data` (versión legible + filas originales para restaurar) |
 | `archive_game(label)` / `restore_game(id)` | Guardar y empezar de cero / restaurar, cada una en una transacción |
@@ -239,10 +241,12 @@ Comandos: `npm run dev`, `npm run build`, `npm run start` y `npm run typecheck`.
 
 1. *SQL Editor* → pega `supabase/schema.sql` completo → *Run*.
    - Es **re-ejecutable** y sirve también para actualizar una base creada con una versión anterior del script.
-   - Crea los 4 equipos y los 4 QR de serie y añade las copias de partidas.
+   - Crea los 4 equipos, los 4 QR de serie (con URL aleatoria) y las copias de partidas.
+   - Si venías de la versión con URLs fijas (`parkour-7qk2mz`…), las cambia por aleatorias: imprime los QR después de ejecutarlo.
    - Borra los QR de ejemplo antiguos (calabaza, cripta y bruja). Los equipos de prueba que hubiera no los borra: desactívalos en `/admin/equipos`.
 2. *Project Settings → API Keys*: copia la URL y la **clave secreta** en las variables.
 3. En `/admin/equipos`, pon el código de cada equipo si quieres usarlo.
+4. En `/admin/qr`, marca la ruta de cada QR según el mapa del muerto.
 
 ## 13. Despliegue en Vercel
 
@@ -273,7 +277,8 @@ Resultados:
 
 - `npm run typecheck` y `npm run build`: sin errores ni avisos.
 - **SQL en PostgreSQL 16**:
-  - el script se aplica dos veces seguidas sin errores y migra una base creada con la versión anterior;
+  - el script se aplica dos veces seguidas sin duplicar nada y migra una base creada con la versión anterior;
+  - genera URLs aleatorias y sustituye las URLs fijas que estaban publicadas;
   - `archive_game` guarda jugadores y escaneos, vacía la partida y conserva equipos, códigos y QR;
   - `restore_game` recupera jugadores con su identidad y escaneos, y los escaneos nuevos continúan la numeración;
   - restaurar con partida en curso crea la copia automática;
@@ -285,8 +290,10 @@ Resultados:
   - pantalla de equipo y baja de jugador;
   - autenticación del panel en `/admin`, `/admin/qr` y `/admin/equipos`, y datos del panel;
   - cabeceras de seguridad.
-- **23 comprobaciones en Chromium (Playwright)** a 390×844 y 1280×900, todas correctas:
-  - el organizador pone código; validaciones en el cliente; el código se pide solo cuando corresponde; código erróneo y correcto;
+- **30 comprobaciones en Chromium (Playwright)** a 390×844 y 1280×900, todas correctas:
+  - el organizador pone código, que se ve en «Códigos de un vistazo» y en el campo de edición;
+  - validaciones en el cliente; el código se pide solo cuando corresponde; código erróneo y correcto;
+  - marcar la ruta de un QR y ver «fuera de ruta», «pendiente» y «no le toca» en el panel; el jugador ve el aviso y ese QR no cuenta para su objetivo;
   - registro desde un QR con vuelta al QR; el panel se actualiza solo; filtros; crear un QR desde el panel;
   - bloqueo tras 8 fallos, visible en el panel, y desbloqueo al cambiar el código;
   - guardar copia y partida nueva, descarga CSV, 401 sin sesión, copia automática y restauración con los móviles identificados de nuevo y todos los escaneos;
@@ -309,7 +316,8 @@ Resultados:
 - [ ] Ejecutar la última versión de `supabase/schema.sql`.
 - [ ] Configurar `ADMIN_PASSWORD` y `ADMIN_SESSION_SECRET` (y Telegram si se quiere).
 - [ ] Decidir si los equipos llevan código y ponerlo en `/admin/equipos`.
-- [ ] Pasar las fichas del sobre 3 (El mapa del muerto) si deben reflejarse en la web.
+- [ ] Marcar en `/admin/qr` la ruta de cada QR según el mapa del muerto.
+- [ ] Valorar hacer el repositorio **privado**: es público y contiene los textos de las pruebas de los QR.
 - [ ] Imprimir los QR desde el dominio definitivo, hacer un ensayo y pulsar «Guardar copia y empezar partida nueva» antes del evento.
 
 ## 18. Notas para quien continúe el desarrollo
@@ -319,6 +327,6 @@ Resultados:
   - Clases del panel: `.panel`.
   - Títulos a dos tintas: `.accent` o `.accent-red` dentro de un `.title`.
 - Iconos y emblemas en `src/components/ornaments.tsx` (`TeamEmblem` elige el emblema por nombre de equipo).
-- Identidad del jugador: `getCurrentPlayer()`. Organizador: `isAdmin()` / `requireAdmin()`. Objetivo de QR: `qrGoal()`.
+- Identidad del jugador: `getCurrentPlayer()`. Organizador: `isAdmin()` / `requireAdmin()`. Objetivo de QR: `qrGoal()`. Rutas: `isOffRoute()` y `countPointsOnRoute()` en `lib/overview.ts`.
 - Consultas siempre en el servidor con `db()`. No añadas políticas RLS públicas.
 - Si cambias columnas de `players` o `scan_events`, actualiza `restore_game` en `schema.sql`.

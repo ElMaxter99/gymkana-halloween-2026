@@ -37,6 +37,14 @@ create table if not exists qr_points (
   created_at timestamptz not null default now()
 );
 
+-- Código legible para que el organizador pueda verlo en /admin/equipos (la comprobación usa el hash).
+-- Solo lo lee el servidor: RLS sin políticas y sin permisos para la clave pública.
+alter table teams add column if not exists join_code text;
+
+-- Rutas: equipos que tienen cada QR en su recorrido (solo informativo, para el panel del organizador).
+-- null o vacío = sin asignar. Se marca en /admin/qr; no se guarda en el repositorio para no desvelar las rutas.
+alter table qr_points add column if not exists assigned_team_ids uuid[];
+
 create table if not exists scan_events (
   id bigint generated always as identity primary key,
   player_id uuid not null references players(id) on delete cascade,
@@ -170,15 +178,24 @@ end $$;
 insert into teams (name) values ('Calabaza'), ('Fantasma'), ('Bruja'), ('Zombie')
 on conflict (name_key) do nothing;
 
--- Ubicaciones con QR. Cada equipo tiene que encontrar 2 (QR_PER_TEAM); qué equipo va a cuál
--- se decide fuera de la web, así que puede cambiarse a última hora sin tocar nada.
+-- Ubicaciones con QR. Cada equipo tiene que encontrar 2 (QR_PER_TEAM).
+-- La URL lleva un sufijo aleatorio generado aquí, distinto en cada base de datos: así no aparece en el
+-- repositorio y nadie puede «escanear» un QR sin encontrarlo. Las URLs reales se ven en /admin/qr.
 -- Textos de serie de cada prueba; se pueden cambiar en /admin/qr (volver a ejecutar el script no los pisa).
-insert into qr_points (slug, title, instructions, sort_order) values
-  ('parkour-7qk2mz', 'Parkour maldito', 'Todo el equipo debe participar en un vídeo donde se realice parte del circuito de parkour.', 1),
-  ('rocodromo-x4b9tw', 'Rocódromo', 'Vídeo de un integrante del equipo completándolo o aguantando arriba 10 segundos.', 2),
-  ('zigzag-m3v8pd', 'Zigzag', 'Recorred el zigzag en fila como una procesión de zombis: cada uno agarrado a los hombros del de delante, arrastrando los pies y sin soltaros. Grabad un vídeo de todo el recorrido.', 3),
-  ('anfiteatro-h6r2kc', 'El Anfiteatro', 'Recread una escena de una película de terror.', 4)
-on conflict (slug) do nothing;
+insert into qr_points (slug, title, instructions, sort_order)
+select v.prefix || '-' || substr(md5(gen_random_uuid()::text), 1, 10), v.title, v.instructions, v.sort_order
+from (values
+  ('parkour', 'Parkour maldito', 'Todo el equipo debe participar en un vídeo donde se realice parte del circuito de parkour.', 1),
+  ('rocodromo', 'Rocódromo', 'Vídeo de un integrante del equipo completándolo o aguantando arriba 10 segundos.', 2),
+  ('zigzag', 'Zigzag', 'Recorred el zigzag en fila como una procesión de zombis: cada uno agarrado a los hombros del de delante, arrastrando los pies y sin soltaros. Grabad un vídeo de todo el recorrido.', 3),
+  ('anfiteatro', 'El Anfiteatro', 'Recread una escena de una película de terror.', 4)
+) as v(prefix, title, instructions, sort_order)
+where not exists (select 1 from qr_points q where q.title = v.title);
+
+-- Una versión anterior del script usaba URLs fijas publicadas en el repositorio: se cambian por aleatorias.
+update qr_points
+set slug = split_part(slug, '-', 1) || '-' || substr(md5(gen_random_uuid()::text), 1, 10)
+where slug in ('parkour-7qk2mz', 'rocodromo-x4b9tw', 'zigzag-m3v8pd', 'anfiteatro-h6r2kc');
 
 -- Elimina los QR de ejemplo de versiones anteriores del script (y sus escaneos de prueba).
 delete from qr_points where slug in ('calabaza-x7k9mq', 'cripta-b4n2vz', 'bruja-k8w3rt');

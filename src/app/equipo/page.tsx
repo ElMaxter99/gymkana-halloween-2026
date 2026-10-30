@@ -4,6 +4,7 @@ import { db } from "@/lib/supabase";
 import { getCurrentPlayer } from "@/lib/player";
 import { formatTime } from "@/lib/format";
 import { qrGoal } from "@/lib/validation";
+import { countPointsOnRoute } from "@/lib/overview";
 import { TeamBanner } from "@/components/ui";
 import { ArrowLeftIcon, Divider, SkullCrossbones } from "@/components/ornaments";
 
@@ -41,7 +42,7 @@ export default async function TeamPage() {
 
   const players = playersRes.data ?? [];
   const totalScans = scansRes.count ?? 0;
-  const pointsFound = new Set((scansRes.data ?? []).map((s) => s.qr_point_id)).size;
+  const pointsFound = await countPointsOnRoute(scansRes.data ?? [], player.teamId);
   const recent = (recentRes.data ?? []) as unknown as ScanRow[];
   const goal = qrGoal();
 

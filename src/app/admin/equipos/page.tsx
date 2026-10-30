@@ -11,7 +11,7 @@ export default async function TeamsAdminPage() {
 
   const supabase = db();
   const [teamsRes, playersRes] = await Promise.all([
-    supabase.from("teams").select("id, name, join_code_hash, locked_until, active").order("created_at"),
+    supabase.from("teams").select("id, name, join_code, join_code_hash, locked_until, active").order("created_at"),
     supabase.from("players").select("team_id").eq("active", true),
   ]);
   if (teamsRes.error) throw teamsRes.error;
@@ -20,6 +20,11 @@ export default async function TeamsAdminPage() {
   const playerCount = new Map<string, number>();
   for (const p of playersRes.data ?? []) playerCount.set(p.team_id, (playerCount.get(p.team_id) ?? 0) + 1);
   const now = new Date();
+  const teams = teamsRes.data ?? [];
+
+  /** Código visible; los puestos con una versión anterior solo tienen hash y no se pueden mostrar. */
+  const codeLabel = (t: (typeof teams)[number]) =>
+    t.join_code ?? (t.join_code_hash ? "(no visible: vuelve a escribirlo)" : null);
 
   return (
     <main className="page-wide admin">
@@ -34,12 +39,47 @@ export default async function TeamsAdminPage() {
         <p className="muted small" style={{ margin: 0 }}>
           Los equipos son fijos: los jugadores solo pueden elegir uno de esta lista. Si un equipo tiene código, hay que
           escribirlo para entrar (dáselo en su hoja). Sin código, cualquiera puede unirse a él eligiéndolo. Los códigos
-          se guardan cifrados: si se te olvida uno, pon otro nuevo. Un equipo desactivado desaparece del registro y sus
-          jugadores dejan de poder registrar escaneos.
+          no distinguen mayúsculas. Un equipo desactivado desaparece del registro y sus jugadores dejan de poder
+          registrar escaneos.
         </p>
       </section>
 
-      {(teamsRes.data ?? []).map((t) => {
+      <section className="panel" aria-labelledby="codes-title">
+        <h2 id="codes-title">Códigos de un vistazo</h2>
+        <div className="table-wrap">
+          <table className="codes-table">
+            <thead>
+              <tr>
+                <th>Equipo</th>
+                <th>Código</th>
+                <th>Jugadores</th>
+              </tr>
+            </thead>
+            <tbody>
+              {teams.map((t) => (
+                <tr key={t.id}>
+                  <td className="team">
+                    <span className="team-heading">
+                      <TeamEmblem name={t.name} size={24} /> {t.name}
+                    </span>
+                    {!t.active && <span className="tag tag--off">desactivado</span>}
+                  </td>
+                  <td>
+                    {codeLabel(t) ? (
+                      <code className="team-code">{codeLabel(t)}</code>
+                    ) : (
+                      <span className="code-state code-state--off">sin código</span>
+                    )}
+                  </td>
+                  <td>{playerCount.get(t.id) ?? 0}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {teams.map((t) => {
         const locked = t.locked_until && new Date(t.locked_until) > now;
         return (
           <section key={t.id} className="panel" aria-labelledby={`team-${t.id}`}>
@@ -52,7 +92,9 @@ export default async function TeamsAdminPage() {
             <p className="small" style={{ margin: "4px 0 0" }}>
               {playerCount.get(t.id) ?? 0} jugadores ·{" "}
               {t.join_code_hash ? (
-                <span className="code-state code-state--on">Con código</span>
+                <span className="code-state code-state--on">
+                  Código: <code className="team-code">{codeLabel(t)}</code>
+                </span>
               ) : (
                 <span className="code-state code-state--off">Sin código: cualquiera puede unirse</span>
               )}
@@ -61,9 +103,11 @@ export default async function TeamsAdminPage() {
 
             <form action={setTeamCode}>
               <input type="hidden" name="id" value={t.id} />
-              <label htmlFor={`code-${t.id}`}>{t.join_code_hash ? "Cambiar código" : "Poner código"}</label>
+              <label htmlFor={`code-${t.id}`}>{t.join_code_hash ? "Editar código" : "Poner código"}</label>
               <input
+                key={t.join_code ?? "none"}
                 id={`code-${t.id}`}
+                defaultValue={t.join_code ?? ""}
                 name="code"
                 minLength={4}
                 maxLength={40}

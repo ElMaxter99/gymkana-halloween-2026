@@ -19,11 +19,16 @@ async function updateTeam(form: FormData, values: Record<string, unknown>) {
 export async function setTeamCode(form: FormData) {
   const code = String(form.get("code") ?? "").trim().slice(0, 40);
   if (code.length < 4) return;
-  await updateTeam(form, { join_code_hash: hashJoinCode(code), failed_join_attempts: 0, locked_until: null });
+  await updateTeam(form, {
+    join_code: code,
+    join_code_hash: hashJoinCode(code),
+    failed_join_attempts: 0,
+    locked_until: null,
+  });
 }
 
 export async function clearTeamCode(form: FormData) {
-  await updateTeam(form, { join_code_hash: null, failed_join_attempts: 0, locked_until: null });
+  await updateTeam(form, { join_code: null, join_code_hash: null, failed_join_attempts: 0, locked_until: null });
 }
 
 export async function setTeamActive(form: FormData) {

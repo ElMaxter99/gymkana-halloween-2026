@@ -10,7 +10,8 @@ export type Overview = {
     createdAt: string;
     players: { id: string; name: string; createdAt: string; active: boolean }[];
   }[];
-  points: { id: string; slug: string; title: string; active: boolean }[];
+  /** assignedTeamIds: equipos con este QR en su ruta; null = sin asignar. */
+  points: { id: string; slug: string; title: string; active: boolean; assignedTeamIds: string[] | null }[];
   /** Primer escaneo y número de escaneos por equipo y punto: progress[teamId][pointId] */
   progress: Record<string, Record<string, { first: string; count: number }>>;
   totalScans: number;
@@ -26,6 +27,8 @@ export type Overview = {
     pointTitle: string;
     /** Primer escaneo de ese equipo en ese punto. */
     first: boolean;
+    /** El punto tiene ruta asignada y este equipo no está en ella. */
+    offRoute: boolean;
   }[];
   recentLimit: number;
   /** Ubicaciones que tiene que encontrar cada equipo. */
@@ -39,13 +42,31 @@ function one<T>(v: One<T>): T | null {
 
 const RECENT_LIMIT = 500;
 
+export function isOffRoute(assigned: string[] | null | undefined, teamId: string): boolean {
+  return Boolean(assigned?.length) && !assigned!.includes(teamId);
+}
+
+/** Ubicaciones distintas encontradas por un equipo que cuentan para su objetivo (sin las de fuera de ruta). */
+export async function countPointsOnRoute(scans: { qr_point_id: string }[], teamId: string): Promise<number> {
+  const ids = [...new Set(scans.map((s) => s.qr_point_id))];
+  if (ids.length === 0) return 0;
+  const { data, error } = await db().from("qr_points").select("id, assigned_team_ids");
+  if (error) throw error;
+  const route = new Map((data ?? []).map((p) => [p.id, p.assigned_team_ids as string[] | null]));
+  return ids.filter((id) => !isOffRoute(route.get(id), teamId)).length;
+}
+
 export async function getOverview(): Promise<Overview> {
   const supabase = db();
 
   const [teamsRes, playersRes, pointsRes, recentRes, allRes] = await Promise.all([
     supabase.from("teams").select("id, name, created_at").order("created_at"),
     supabase.from("players").select("id, display_name, team_id, created_at, active").order("created_at"),
-    supabase.from("qr_points").select("id, slug, title, active").order("sort_order").order("created_at"),
+    supabase
+      .from("qr_points")
+      .select("id, slug, title, active, assigned_team_ids")
+      .order("sort_order")
+      .order("created_at"),
     supabase
       .from("scan_events")
       .select(
@@ -65,6 +86,15 @@ export async function getOverview(): Promise<Overview> {
   for (const r of [teamsRes, playersRes, pointsRes, recentRes, allRes]) {
     if (r.error) throw r.error;
   }
+
+  const points: Overview["points"] = (pointsRes.data ?? []).map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    active: p.active,
+    assignedTeamIds: p.assigned_team_ids?.length ? p.assigned_team_ids : null,
+  }));
+  const route = new Map(points.map((p) => [p.id, p.assignedTeamIds]));
 
   const progress: Overview["progress"] = {};
   const firstIds = new Set<number>();
@@ -88,7 +118,7 @@ export async function getOverview(): Promise<Overview> {
         .filter((p) => p.team_id === t.id)
         .map((p) => ({ id: p.id, name: p.display_name, createdAt: p.created_at, active: p.active })),
     })),
-    points: pointsRes.data ?? [],
+    points,
     progress,
     totalScans: allRes.count ?? 0,
     recentLimit: RECENT_LIMIT,
@@ -103,6 +133,7 @@ export async function getOverview(): Promise<Overview> {
       pointId: s.qr_point_id,
       pointTitle: one(s.point as One<{ title: string }>)?.title ?? "?",
       first: firstIds.has(s.id),
+      offRoute: isOffRoute(route.get(s.qr_point_id), s.team_id),
     })),
   };
 }

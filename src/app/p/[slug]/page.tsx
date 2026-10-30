@@ -5,6 +5,7 @@ import { after } from "next/server";
 import { db } from "@/lib/supabase";
 import { getCurrentPlayer } from "@/lib/player";
 import { formatTime } from "@/lib/format";
+import { countPointsOnRoute, isOffRoute } from "@/lib/overview";
 import { notifyTelegram, scanMessage } from "@/lib/telegram";
 import { qrGoal, SLUG_RE } from "@/lib/validation";
 import { GoldenRule, SuccessSeal, TeamBanner } from "@/components/ui";
@@ -23,7 +24,7 @@ export default async function QrPointPage({ params }: { params: Promise<{ slug: 
   const supabase = db();
   const { data: point, error } = await supabase
     .from("qr_points")
-    .select("id, title, instructions")
+    .select("id, title, instructions, assigned_team_ids")
     .eq("slug", slug)
     .eq("active", true)
     .maybeSingle();
@@ -49,8 +50,9 @@ export default async function QrPointPage({ params }: { params: Promise<{ slug: 
   // Escaneos del equipo, incluido el recién guardado.
   const { data: teamScans } = await supabase.from("scan_events").select("qr_point_id").eq("team_id", player.teamId);
   const teamScansOfPoint = (teamScans ?? []).filter((s) => s.qr_point_id === point.id).length || 1;
-  const pointsFound = new Set((teamScans ?? []).map((s) => s.qr_point_id)).size || 1;
+  const pointsFound = await countPointsOnRoute(teamScans ?? [], player.teamId);
   const goal = qrGoal();
+  const offRoute = isOffRoute(point.assigned_team_ids, player.teamId);
 
   after(() =>
     notifyTelegram(
@@ -60,6 +62,7 @@ export default async function QrPointPage({ params }: { params: Promise<{ slug: 
         point: point.title,
         at: scan.scanned_at,
         teamScansOfPoint,
+        offRoute,
       }),
     ),
   );
@@ -92,6 +95,12 @@ export default async function QrPointPage({ params }: { params: Promise<{ slug: 
             ? `Vuestro equipo ya había registrado este QR. Este escaneo también queda anotado (${teamScansOfPoint} en total).`
             : "Es la primera vez que vuestro equipo registra este QR."}
         </p>
+        {offRoute && (
+          <div className="alert alert--warn" role="note">
+            <b>Ojo:</b> este QR no está en la ruta de vuestro equipo. Queda anotado, pero no cuenta para vuestras {goal}{" "}
+            ubicaciones. Revisad el mapa.
+          </div>
+        )}
         <p className="small" style={{ fontWeight: 700 }}>
           {pointsFound >= goal
             ? `¡Ya tenéis vuestras ${goal} ubicaciones!`

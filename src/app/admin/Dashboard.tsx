@@ -205,6 +205,7 @@ export default function Dashboard({ initial, timeZone }: { initial: Overview; ti
                   <td data-label="Punto QR">
                     {s.pointTitle}
                     {s.first && <span className="tag tag--first">1.º</span>}
+                    {s.offRoute && <span className="tag tag--offroute">fuera de ruta</span>}
                   </td>
                 </tr>
               ))}
@@ -217,7 +218,8 @@ export default function Dashboard({ initial, timeZone }: { initial: Overview; ti
         <h2 id="progress-title">Progreso por equipo</h2>
         <p className="muted small">
           Hora del primer escaneo de cada equipo en cada QR activo (entre paréntesis, escaneos totales). Cada equipo
-          tiene que encontrar {data.qrGoal}; cuáles le tocan se decide fuera de la web.
+          tiene que encontrar {data.qrGoal}. Si has marcado las rutas en «Puntos QR»: «pendiente» = le toca y aún no
+          lo ha escaneado; «no le toca» = fuera de su ruta.
         </p>
         {data.teams.length === 0 ? (
           <p className="muted">Todavía no se ha registrado ningún equipo.</p>
@@ -234,18 +236,30 @@ export default function Dashboard({ initial, timeZone }: { initial: Overview; ti
               <tbody>
                 {data.teams.map((t) => {
                   const row = data.progress[t.id] ?? {};
-                  const found = activePoints.filter((p) => row[p.id]).length;
+                  // Los QR fuera de ruta no cuentan para el objetivo.
+                  const found = activePoints.filter(
+                    (p) => row[p.id] && (!p.assignedTeamIds || p.assignedTeamIds.includes(t.id)),
+                  ).length;
                   return (
                     <tr key={t.id}>
                       <td className="team">{t.name}</td>
                       {activePoints.map((p) => {
                         const cell = row[p.id];
-                        return cell ? (
-                          <td key={p.id} className="cell-yes">
-                            ✓ {formatTime(cell.first, timeZone)} <span className="muted">({cell.count})</span>
-                          </td>
+                        const assigned = p.assignedTeamIds;
+                        const onRoute = !assigned || assigned.includes(t.id);
+                        if (cell) {
+                          return (
+                            <td key={p.id} className={onRoute ? "cell-yes" : "cell-offroute"}>
+                              ✓ {formatTime(cell.first, timeZone)} <span className="muted">({cell.count})</span>
+                              {!onRoute && <span className="tag tag--offroute">fuera de ruta</span>}
+                            </td>
+                          );
+                        }
+                        if (!assigned) return <td key={p.id} className="cell-no" aria-label="Sin escanear">—</td>;
+                        return onRoute ? (
+                          <td key={p.id} className="cell-pending">pendiente</td>
                         ) : (
-                          <td key={p.id} className="cell-no" aria-label="Sin escanear">—</td>
+                          <td key={p.id} className="cell-na">no le toca</td>
                         );
                       })}
                       <td className={found >= data.qrGoal ? "cell-yes" : undefined}>
