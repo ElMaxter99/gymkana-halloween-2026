@@ -20,3 +20,8 @@ export function envInt(name: string, fallback: number): number {
   const n = Number(process.env[name]);
   return Number.isInteger(n) && n > 0 ? n : fallback;
 }
+
+/** Ubicaciones con QR que tiene que encontrar cada equipo (qué ubicaciones son se decide fuera de la web). */
+export function qrGoal(): number {
+  return envInt("QR_PER_TEAM", 2);
+}

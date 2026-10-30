@@ -2,29 +2,27 @@ import Link from "next/link";
 import { db } from "@/lib/supabase";
 import { getCurrentPlayer, safeNext } from "@/lib/player";
 import { ArrowLeftIcon, Bat } from "@/components/ornaments";
-import RegistroForm from "./RegistroForm";
+import RegistroForm, { type TeamOption } from "./RegistroForm";
 
 export const dynamic = "force-dynamic";
 
-export default async function RegistroPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ next?: string; modo?: string }>;
-}) {
-  const params = await searchParams;
-  const next = safeNext(params.next);
+export default async function RegistroPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  const next = safeNext((await searchParams).next);
   const player = await getCurrentPlayer();
 
-  // Solo se exponen id y nombre de los equipos: nunca el código ni sus jugadores.
-  const { data: teams, error } = await db()
+  const { data, error } = await db()
     .from("teams")
-    .select("id, name")
+    .select("id, name, join_code_hash")
     .eq("active", true)
-    .order("name");
+    .order("created_at");
   if (error) throw error;
 
-  const list = teams ?? [];
-  const initialMode = params.modo === "crear" || (params.modo !== "unirme" && list.length === 0) ? "create" : "join";
+  // Al navegador solo llega el id, el nombre y si el equipo pide código; nunca el hash.
+  const teams: TeamOption[] = (data ?? []).map((t) => ({
+    id: t.id,
+    name: t.name,
+    requiresCode: Boolean(t.join_code_hash),
+  }));
 
   return (
     <main className="page">
@@ -34,18 +32,15 @@ export default async function RegistroPage({
         </Link>
         <Bat className="flutter" size={44} />
       </div>
-      <h1 className="title center" style={{ fontSize: "2.3rem" }}>
-        {initialMode === "create" && !player ? "Crea tu equipo" : "Únete a la aventura"}
+      <h1 className="title page-title center">
+        Únete a la <span className="accent">aventura</span>
       </h1>
       {next && !player && (
-        <p className="alert alert--info">
-          ¡Habéis encontrado un QR! Identifícate y te llevamos directamente a él.
-        </p>
+        <p className="alert alert--info">¡Habéis encontrado un QR! Identifícate y te llevamos directamente a él.</p>
       )}
       <RegistroForm
-        teams={list}
+        teams={teams}
         next={next}
-        initialMode={initialMode}
         current={player ? { playerName: player.displayName, teamName: player.teamName } : null}
       />
     </main>

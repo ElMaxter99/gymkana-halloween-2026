@@ -6,8 +6,8 @@ import { db } from "@/lib/supabase";
 import { getCurrentPlayer } from "@/lib/player";
 import { formatTime } from "@/lib/format";
 import { notifyTelegram, scanMessage } from "@/lib/telegram";
-import { SLUG_RE } from "@/lib/validation";
-import { SuccessSeal, TeamBanner } from "@/components/ui";
+import { qrGoal, SLUG_RE } from "@/lib/validation";
+import { GoldenRule, SuccessSeal, TeamBanner } from "@/components/ui";
 import { Bat, Divider, EnvelopeIcon, PinIcon, UsersIcon } from "@/components/ornaments";
 
 export const dynamic = "force-dynamic";
@@ -46,13 +46,11 @@ export default async function QrPointPage({ params }: { params: Promise<{ slug: 
     .single();
   if (scanError) throw scanError;
 
-  // Incluye el escaneo recién guardado.
-  const { count } = await supabase
-    .from("scan_events")
-    .select("id", { count: "exact", head: true })
-    .eq("team_id", player.teamId)
-    .eq("qr_point_id", point.id);
-  const teamScansOfPoint = count ?? 1;
+  // Escaneos del equipo, incluido el recién guardado.
+  const { data: teamScans } = await supabase.from("scan_events").select("qr_point_id").eq("team_id", player.teamId);
+  const teamScansOfPoint = (teamScans ?? []).filter((s) => s.qr_point_id === point.id).length || 1;
+  const pointsFound = new Set((teamScans ?? []).map((s) => s.qr_point_id)).size || 1;
+  const goal = qrGoal();
 
   after(() =>
     notifyTelegram(
@@ -94,15 +92,20 @@ export default async function QrPointPage({ params }: { params: Promise<{ slug: 
             ? `Vuestro equipo ya había registrado este QR. Este escaneo también queda anotado (${teamScansOfPoint} en total).`
             : "Es la primera vez que vuestro equipo registra este QR."}
         </p>
+        <p className="small" style={{ fontWeight: 700 }}>
+          {pointsFound >= goal
+            ? `¡Ya tenéis vuestras ${goal} ubicaciones!`
+            : `Lleváis ${pointsFound} de ${goal} ubicaciones.`}
+        </p>
         <p className="muted small">
           El escaneo indica que habéis encontrado el QR; la prueba la valida el organizador.
         </p>
       </section>
 
-      <div className="alert alert--info">
-        <EnvelopeIcon size={22} />
-        <span>Haced la prueba y enviad las fotos o vídeos por WhatsApp al organizador.</span>
-      </div>
+      <GoldenRule />
+      <p className="center muted small" style={{ marginTop: -4 }}>
+        <EnvelopeIcon size={16} /> Enviad las fotos o vídeos por WhatsApp al organizador.
+      </p>
 
       <Link className="button btn-wood" href="/equipo">
         <UsersIcon /> Ver mi equipo

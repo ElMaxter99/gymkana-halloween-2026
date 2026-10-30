@@ -178,3 +178,99 @@ export const ArrowLeftIcon = (p: SvgProps) => (
 export const ClockIcon = (p: SvgProps) => (
   <Icon {...p}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></Icon>
 );
+
+/* ---------- Iconos de las hojas de la gymkana ---------- */
+
+export function SkullCrossbones({ className, size = 44 }: SvgProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 64 64" aria-hidden="true">
+      <g stroke="currentColor" strokeWidth="5" strokeLinecap="round">
+        <path d="M10 40l44 18M54 40L10 58" />
+      </g>
+      <g fill="currentColor">
+        <circle cx="8" cy="38" r="4" /><circle cx="10" cy="44" r="3.5" />
+        <circle cx="56" cy="38" r="4" /><circle cx="54" cy="44" r="3.5" />
+        <circle cx="8" cy="60" r="3.5" /><circle cx="56" cy="60" r="3.5" />
+        <path d="M32 4C20 4 13 12 13 22c0 6 3 10 6 12v7h26v-7c3-2 6-6 6-12C51 12 44 4 32 4z" />
+      </g>
+      <ellipse cx="25" cy="23" rx="5" ry="6" fill="var(--parchment)" />
+      <ellipse cx="39" cy="23" rx="5" ry="6" fill="var(--parchment)" />
+      <path d="M32 29l-3 6h6z" fill="var(--parchment)" />
+    </svg>
+  );
+}
+
+export const TrophyIcon = (p: SvgProps) => (
+  <Icon {...p}><path d="M7 4h10v5a5 5 0 0 1-10 0z" /><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 14v4M8 21h8M9 18h6" /></Icon>
+);
+export const TargetIcon = (p: SvgProps) => (
+  <Icon {...p}><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="3.5" /><path d="M12 1v5M12 18v5M1 12h5M18 12h5" /></Icon>
+);
+export const FlameIcon = (p: SvgProps) => (
+  <Icon {...p}><path d="M12 22c4 0 7-3 7-7 0-5-4-7-5-12-2 3-1 6-3 7-1-2-2-3-2-5-3 3-4 6-4 10 0 4 3 7 7 7z" /></Icon>
+);
+export const PentagramIcon = (p: SvgProps) => (
+  <Icon {...p}><circle cx="12" cy="12" r="10" /><path d="M12 3.5l5 15.5L4 9.5h16L7 19z" /></Icon>
+);
+export const ScaleIcon = (p: SvgProps) => (
+  <Icon {...p}><path d="M12 3v18M7 21h10M4 7h16M6 7l-3 7h6zM18 7l-3 7h6z" /></Icon>
+);
+export const ShieldCheckIcon = (p: SvgProps) => (
+  <Icon {...p}><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" /><path d="M8.5 12l2.5 2.5 4.5-5" /></Icon>
+);
+
+/* ---------- Emblemas de los equipos fijos ---------- */
+
+function Ghost({ size = 40 }: SvgProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M32 6c-12 0-20 9-20 21v29l6-5 5 5 5-5 4 5 4-5 5 5 5-5 6 5V27C52 15 44 6 32 6z" fill="var(--cream)" stroke="var(--ink)" strokeWidth="2" />
+      <ellipse cx="25" cy="28" rx="4" ry="6" fill="var(--ink)" />
+      <ellipse cx="39" cy="28" rx="4" ry="6" fill="var(--ink)" />
+      <ellipse cx="32" cy="41" rx="4" ry="5" fill="var(--ink)" />
+    </svg>
+  );
+}
+
+function WitchHat({ size = 40 }: SvgProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M36 4c-6 4-14 20-18 36h28c-2-10-4-18-2-24 2-4 6-5 8-4-3-5-10-9-16-8z" fill="var(--ink)" stroke="var(--cream)" strokeWidth="1.5" />
+      <rect x="17" y="34" width="30" height="6" fill="var(--pumpkin)" />
+      <rect x="28" y="33" width="8" height="8" rx="1" fill="none" stroke="var(--gold)" strokeWidth="2" />
+      <ellipse cx="32" cy="46" rx="29" ry="7" fill="var(--ink)" stroke="var(--cream)" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+function ZombieHand({ size = 40 }: SvgProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M2 58c8-4 20-6 30-6s22 2 30 6v4H2z" fill="var(--brown)" />
+      <path
+        d="M24 54V34l-6-10c-1-3 2-5 4-3l5 7V12c0-3 4-3 4 0v14V8c0-3 4-3 4 0v18-14c0-3 4-3 4 0v16-10c0-3 4-3 4 0v16c0 6-2 10-5 13v5z"
+        fill="#7f9a5a"
+        stroke="var(--ink)"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path d="M30 40l3 2M36 46l-3 1" stroke="var(--ink)" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+export function TeamEmblem({ name, size = 40 }: { name: string; size?: number }) {
+  switch (name.trim().toLowerCase()) {
+    case "calabaza":
+      return <Pumpkin size={size} />;
+    case "fantasma":
+      return <Ghost size={size} />;
+    case "bruja":
+      return <WitchHat size={size} />;
+    case "zombie":
+    case "zombi":
+      return <ZombieHand size={size} />;
+    default:
+      return <span aria-hidden="true">{name.trim().charAt(0).toUpperCase() || "?"}</span>;
+  }
+}

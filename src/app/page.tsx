@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getCurrentPlayer } from "@/lib/player";
-import { TeamBanner } from "@/components/ui";
+import { GoldenRule, TeamBanner } from "@/components/ui";
 import {
   Bat,
   Candle,
@@ -9,9 +9,9 @@ import {
   EnvelopeIcon,
   HauntedScene,
   KeyIcon,
-  MapIcon,
   Pumpkin,
   QrIcon,
+  SkullCrossbones,
   UsersIcon,
   WaxSeal,
   WebCorner,
@@ -30,7 +30,7 @@ export default async function Home() {
           <p className="label poster__kicker">Se busca valor · 31 de octubre</p>
           <Pumpkin size={64} />
           <h1 className="poster__title">
-            Gymkana <span>Halloween 2026</span>
+            Gymkana <span>Halloween <em>2026</em></span>
           </h1>
           <span className="ribbon">La web que da vida a tu aventura</span>
         </div>
@@ -45,18 +45,18 @@ export default async function Home() {
             <Link className="button btn-seal" href="/equipo">
               <UsersIcon /> Ver mi equipo
             </Link>
-            <a className="button btn-wood" href="#como-jugar">
-              <MapIcon /> Cómo se juega
-            </a>
+            <Link className="button btn-wood" href="/reglas">
+              <SkullCrossbones size={26} /> Reglas de la gincana
+            </Link>
           </div>
         </>
       ) : (
         <div className="button-row">
-          <Link className="button btn-seal" href="/registro?modo=crear">
-            <UsersIcon /> Crear equipo
+          <Link className="button btn-seal" href="/registro">
+            <KeyIcon /> Unirme a mi equipo
           </Link>
-          <Link className="button btn-wood" href="/registro?modo=unirme">
-            <KeyIcon /> Unirme a un equipo
+          <Link className="button btn-wood" href="/reglas">
+            <SkullCrossbones size={26} /> Reglas de la gincana
           </Link>
         </div>
       )}
@@ -67,11 +67,11 @@ export default async function Home() {
         <ol className="steps">
           <li>
             <WaxSeal><UsersIcon /></WaxSeal>
-            <span><b>Registra a tu equipo</b>Uno lo crea con un código secreto; el resto se une con ese código desde su móvil.</span>
+            <span><b>Únete a tu equipo</b>Calabaza, Fantasma, Bruja o Zombie: elige el tuyo desde tu móvil (y escribe su código si os lo han dado).</span>
           </li>
           <li>
             <WaxSeal><Compass size={30} /></WaxSeal>
-            <span><b>Sigue las pistas en papel</b>La gymkana se juega fuera: mapas, sobres y objetivos.</span>
+            <span><b>Abrid los sobres en orden</b>La gincana se juega en papel: cada sobre trae sus retos y su puntuación.</span>
           </li>
           <li>
             <WaxSeal><QrIcon /></WaxSeal>
@@ -79,10 +79,12 @@ export default async function Home() {
           </li>
           <li>
             <WaxSeal><EnvelopeIcon /></WaxSeal>
-            <span><b>Envía las pruebas por WhatsApp</b>Fotos y vídeos van al organizador, que es quien las valida.</span>
+            <span><b>Envía las pruebas por WhatsApp</b>Fotos y vídeos van al organizador, que es quien las valida y da los puntos.</span>
           </li>
         </ol>
       </section>
+
+      <GoldenRule />
 
       <div className="center" aria-hidden="true">
         <Candle size={30} />

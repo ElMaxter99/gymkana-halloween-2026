@@ -4,43 +4,32 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ErrorAlert, SuccessSeal, TeamBanner } from "@/components/ui";
-import { Divider, QrIcon, UsersIcon } from "@/components/ornaments";
+import { Divider, QrIcon, TeamEmblem, UsersIcon } from "@/components/ornaments";
 
-type Team = { id: string; name: string };
-type Mode = "join" | "create";
+export type TeamOption = { id: string; name: string; requiresCode: boolean };
 type Props = {
-  teams: Team[];
+  teams: TeamOption[];
   next: string | null;
-  initialMode: Mode;
   current: { playerName: string; teamName: string } | null;
 };
 
-export default function RegistroForm({ teams, next, initialMode, current }: Props) {
+export default function RegistroForm({ teams, next, current }: Props) {
   const router = useRouter();
   const [identity, setIdentity] = useState(current);
-  const [justRegistered, setJustRegistered] = useState<null | { created: boolean }>(null);
-  const [mode, setMode] = useState<Mode>(initialMode);
+  const [justRegistered, setJustRegistered] = useState(false);
   const [playerName, setPlayerName] = useState("");
-  const [teamName, setTeamName] = useState("");
   const [teamId, setTeamId] = useState("");
   const [joinCode, setJoinCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [invalid, setInvalid] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  function switchMode(m: Mode) {
-    setMode(m);
-    setError(null);
-    setInvalid(null);
-  }
+  const selected = teams.find((t) => t.id === teamId);
 
   function validate(): { field: string; message: string } | null {
     if (!playerName.trim()) return { field: "playerName", message: "Escribe tu nombre." };
-    if (mode === "create" && teamName.trim().length < 2)
-      return { field: "teamName", message: "El nombre del equipo debe tener al menos 2 caracteres." };
-    if (mode === "join" && !teamId) return { field: "teamId", message: "Elige tu equipo de la lista." };
-    if (joinCode.trim().length < 4)
-      return { field: "joinCode", message: "El código del equipo debe tener al menos 4 caracteres." };
+    if (!selected) return { field: "teams", message: "Elige tu equipo." };
+    if (selected.requiresCode && !joinCode.trim()) return { field: "joinCode", message: "Escribe el código de tu equipo." };
     return null;
   }
 
@@ -49,7 +38,7 @@ export default function RegistroForm({ teams, next, initialMode, current }: Prop
     try {
       await fetch("/api/leave", { method: "POST" });
       setIdentity(null);
-      setJustRegistered(null);
+      setJustRegistered(false);
       router.refresh();
     } finally {
       setBusy(false);
@@ -63,7 +52,8 @@ export default function RegistroForm({ teams, next, initialMode, current }: Prop
     setInvalid(problem?.field ?? null);
     setError(problem?.message ?? null);
     if (problem) {
-      document.getElementById(problem.field)?.focus();
+      const target = problem.field === "teams" ? document.querySelector<HTMLInputElement>('input[name="team"]') : document.getElementById(problem.field);
+      target?.focus();
       return;
     }
 
@@ -72,7 +62,7 @@ export default function RegistroForm({ teams, next, initialMode, current }: Prop
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ mode, playerName, teamName, teamId, joinCode }),
+        body: JSON.stringify({ playerName, teamId, joinCode: selected?.requiresCode ? joinCode : "" }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -84,7 +74,7 @@ export default function RegistroForm({ teams, next, initialMode, current }: Prop
         return;
       }
       setIdentity({ playerName: data.playerName, teamName: data.teamName });
-      setJustRegistered({ created: Boolean(data.created) });
+      setJustRegistered(true);
       router.refresh();
     } catch {
       setError("No hay conexión. Comprueba los datos móviles e inténtalo otra vez.");
@@ -99,15 +89,9 @@ export default function RegistroForm({ teams, next, initialMode, current }: Prop
         <TeamBanner playerName={identity.playerName} teamName={identity.teamName} />
         <section className="parchment">
           {justRegistered ? (
-            <SuccessSeal title={justRegistered.created ? "¡Equipo creado!" : "¡Ya estás dentro!"}>
-              {justRegistered.created
-                ? "Comparte el código con tus compañeros para que se unan desde su móvil."
-                : "Tu móvil ya está vinculado a tu equipo."}
-            </SuccessSeal>
+            <SuccessSeal title="¡Ya estás dentro!">Tu móvil ya está vinculado a tu equipo.</SuccessSeal>
           ) : (
-            <SuccessSeal title="Este móvil ya está registrado">
-              No hace falta registrarse otra vez.
-            </SuccessSeal>
+            <SuccessSeal title="Este móvil ya está registrado">No hace falta registrarse otra vez.</SuccessSeal>
           )}
           <Divider />
           <p>Cuando encontréis un QR, escanéalo con la cámara: quedará anotado a tu nombre y al de tu equipo.</p>
@@ -134,15 +118,6 @@ export default function RegistroForm({ teams, next, initialMode, current }: Prop
 
   return (
     <form className="parchment" onSubmit={submit} noValidate>
-      <div className="tabs" role="group" aria-label="Tipo de registro">
-        <button type="button" aria-pressed={mode === "join"} onClick={() => switchMode("join")}>
-          Unirme a un equipo
-        </button>
-        <button type="button" aria-pressed={mode === "create"} onClick={() => switchMode("create")}>
-          Crear equipo
-        </button>
-      </div>
-
       <label htmlFor="playerName">Tu nombre</label>
       <input
         id="playerName"
@@ -156,54 +131,38 @@ export default function RegistroForm({ teams, next, initialMode, current }: Prop
         {...fieldProps("playerName")}
       />
 
-      {mode === "create" ? (
-        <>
-          <label htmlFor="teamName">Nombre del equipo</label>
-          <input
-            id="teamName"
-            value={teamName}
-            onChange={(e) => setTeamName(e.target.value)}
-            maxLength={40}
-            autoComplete="off"
-            autoCapitalize="words"
-            enterKeyHint="next"
-            placeholder="Ej. Los Lobos"
-            {...fieldProps("teamName")}
-          />
-          <label htmlFor="joinCode">Inventa un código secreto</label>
-          <input
-            id="joinCode"
-            value={joinCode}
-            onChange={(e) => setJoinCode(e.target.value)}
-            maxLength={40}
-            autoComplete="off"
-            autoCapitalize="none"
-            autoCorrect="off"
-            spellCheck={false}
-            enterKeyHint="done"
-            placeholder="Mínimo 4 caracteres"
-            {...fieldProps("joinCode")}
-          />
-          <span className="hint">Díselo solo a tus compañeros: lo necesitarán para unirse desde su móvil.</span>
-        </>
-      ) : teams.length === 0 ? (
-        <p className="empty" style={{ marginTop: 16 }}>
-          Todavía no hay equipos. Pulsa «Crear equipo» para fundar el tuyo.
-        </p>
-      ) : (
-        <>
-          <label htmlFor="teamId">Tu equipo</label>
-          <select id="teamId" value={teamId} onChange={(e) => setTeamId(e.target.value)} {...fieldProps("teamId")}>
-            <option value="" disabled>
-              Elige tu equipo…
-            </option>
+      <fieldset className="team-picker" aria-invalid={invalid === "teams" ? true : undefined}>
+        <legend>Tu equipo</legend>
+        {teams.length === 0 ? (
+          <p className="empty">Todavía no hay equipos disponibles. Avisa al organizador.</p>
+        ) : (
+          <div className="team-picker__grid">
             {teams.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
+              <label key={t.id} className="team-option">
+                <input
+                  type="radio"
+                  name="team"
+                  value={t.id}
+                  checked={teamId === t.id}
+                  onChange={() => {
+                    setTeamId(t.id);
+                    setJoinCode("");
+                    if (invalid === "teams") setInvalid(null);
+                  }}
+                />
+                <span className="team-option__card">
+                  <span className="team-option__emblem"><TeamEmblem name={t.name} size={48} /></span>
+                  <span className="team-option__name">{t.name}</span>
+                </span>
+              </label>
             ))}
-          </select>
-          <label htmlFor="joinCode">Código del equipo</label>
+          </div>
+        )}
+      </fieldset>
+
+      {selected?.requiresCode && (
+        <>
+          <label htmlFor="joinCode">Código del equipo {selected.name}</label>
           <input
             id="joinCode"
             value={joinCode}
@@ -214,7 +173,7 @@ export default function RegistroForm({ teams, next, initialMode, current }: Prop
             autoCorrect="off"
             spellCheck={false}
             enterKeyHint="done"
-            placeholder="Pídeselo a quien creó el equipo"
+            placeholder="Lo tenéis en la hoja de vuestro equipo"
             {...fieldProps("joinCode")}
           />
         </>
@@ -226,8 +185,8 @@ export default function RegistroForm({ teams, next, initialMode, current }: Prop
         </div>
       )}
 
-      <button type="submit" disabled={busy || (mode === "join" && teams.length === 0)} aria-busy={busy}>
-        {busy ? "Sellando el pacto…" : mode === "create" ? "Crear equipo y entrar" : "Unirme al equipo"}
+      <button type="submit" disabled={busy || teams.length === 0} aria-busy={busy}>
+        {busy ? "Sellando el pacto…" : selected ? `Unirme al equipo ${selected.name}` : "Unirme al equipo"}
       </button>
     </form>
   );

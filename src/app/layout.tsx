@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Grenze_Gotisch, IM_Fell_English_SC, Roboto_Condensed } from "next/font/google";
+import { Alfa_Slab_One, Roboto_Condensed } from "next/font/google";
 import "./globals.css";
 
 // next/font descarga las fuentes en el build y las sirve desde el propio dominio:
 // en el móvil no se hace ninguna petición a Google. Si fallan, globals.css tiene alternativas del sistema.
-const titleFont = Grenze_Gotisch({ subsets: ["latin"], weight: ["600", "800"], variable: "--font-title", display: "swap" });
-const printFont = IM_Fell_English_SC({ subsets: ["latin"], weight: "400", variable: "--font-print", display: "swap" });
-const bodyFont = Roboto_Condensed({ subsets: ["latin"], weight: ["400", "600", "700"], variable: "--font-body", display: "swap" });
+// Las mismas familias que las hojas impresas: slab serif gruesa para títulos y condensada para el texto.
+const titleFont = Alfa_Slab_One({ subsets: ["latin"], weight: "400", variable: "--font-title", display: "swap" });
+const bodyFont = Roboto_Condensed({ subsets: ["latin"], weight: ["400", "600", "700", "800"], variable: "--font-body", display: "swap" });
 
 const siteUrl =
   process.env.SITE_URL ??
@@ -34,7 +34,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${titleFont.variable} ${printFont.variable} ${bodyFont.variable}`}>
+    <html lang="es" className={`${titleFont.variable} ${bodyFont.variable}`}>
       <body>{children}</body>
     </html>
   );

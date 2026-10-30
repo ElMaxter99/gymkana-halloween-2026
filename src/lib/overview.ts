@@ -1,5 +1,6 @@
 import "server-only";
 import { db } from "./supabase";
+import { qrGoal } from "./validation";
 
 export type Overview = {
   generatedAt: string;
@@ -27,6 +28,8 @@ export type Overview = {
     first: boolean;
   }[];
   recentLimit: number;
+  /** Ubicaciones que tiene que encontrar cada equipo. */
+  qrGoal: number;
 };
 
 type One<T> = T | T[] | null;
@@ -89,6 +92,7 @@ export async function getOverview(): Promise<Overview> {
     progress,
     totalScans: allRes.count ?? 0,
     recentLimit: RECENT_LIMIT,
+    qrGoal: qrGoal(),
     recentScans: (recentRes.data ?? []).map((s) => ({
       id: s.id,
       scannedAt: s.scanned_at,

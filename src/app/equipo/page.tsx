@@ -3,8 +3,9 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/supabase";
 import { getCurrentPlayer } from "@/lib/player";
 import { formatTime } from "@/lib/format";
+import { qrGoal } from "@/lib/validation";
 import { TeamBanner } from "@/components/ui";
-import { ArrowLeftIcon, Divider, MapIcon } from "@/components/ornaments";
+import { ArrowLeftIcon, Divider, SkullCrossbones } from "@/components/ornaments";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,7 @@ export default async function TeamPage() {
   const totalScans = scansRes.count ?? 0;
   const pointsFound = new Set((scansRes.data ?? []).map((s) => s.qr_point_id)).size;
   const recent = (recentRes.data ?? []) as unknown as ScanRow[];
+  const goal = qrGoal();
 
   return (
     <main className="page">
@@ -58,14 +60,22 @@ export default async function TeamPage() {
         <Divider />
         <div className="stat-row">
           <div className="stat-tile">
+            <b>
+              {pointsFound}
+              <small> / {goal}</small>
+            </b>
+            <span className="label">ubicaciones</span>
+          </div>
+          <div className="stat-tile">
             <b>{totalScans}</b>
             <span className="label">escaneos</span>
           </div>
-          <div className="stat-tile">
-            <b>{pointsFound}</b>
-            <span className="label">QR distintos</span>
-          </div>
         </div>
+        <p className="small" style={{ fontWeight: 700 }}>
+          {pointsFound >= goal
+            ? `¡Habéis encontrado vuestras ${goal} ubicaciones!`
+            : `Os ${goal - pointsFound === 1 ? "queda" : "quedan"} ${goal - pointsFound} de ${goal} ubicaciones por encontrar.`}
+        </p>
         <p className="muted small">
           Escanear un QR solo indica que lo habéis encontrado. Las pruebas las valida el organizador con las fotos y
           vídeos que le enviéis por WhatsApp.
@@ -108,8 +118,8 @@ export default async function TeamPage() {
         )}
       </section>
 
-      <Link className="button btn-wood" href="/#como-jugar">
-        <MapIcon /> Cómo se juega
+      <Link className="button btn-wood" href="/reglas">
+        <SkullCrossbones size={26} /> Reglas de la gincana
       </Link>
     </main>
   );

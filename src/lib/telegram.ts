@@ -43,8 +43,6 @@ export function scanMessage(scan: {
   return lines.join("\n");
 }
 
-export function joinMessage(player: string, team: string, created: boolean): string {
-  return created
-    ? `🕯️ NUEVO EQUIPO\n👥 Equipo: ${team}\n🧙 Creado por: ${player}`
-    : `🦇 NUEVO JUGADOR\n👥 Equipo: ${team}\n🧙 Jugador: ${player}`;
+export function joinMessage(player: string, team: string): string {
+  return `🦇 NUEVO JUGADOR\n👥 Equipo: ${team}\n🧙 Jugador: ${player}`;
 }

@@ -1,10 +1,12 @@
-import { AlertIcon, CheckIcon, WaxSeal } from "./ornaments";
+import { AlertIcon, CheckIcon, PentagramIcon, TeamEmblem, WaxSeal } from "./ornaments";
 
 /** «Eres X del equipo Y»: se muestra en todas las pantallas del jugador identificado. */
 export function TeamBanner({ playerName, teamName }: { playerName: string; teamName: string }) {
   return (
     <div className="team-banner">
-      <WaxSeal tone="blood">{teamName.trim().charAt(0).toUpperCase() || "?"}</WaxSeal>
+      <WaxSeal tone="blood">
+        <TeamEmblem name={teamName} size={34} />
+      </WaxSeal>
       <div>
         <span className="team-banner__who">
           <b>{playerName}</b>, perteneces al equipo
@@ -37,6 +39,40 @@ export function SuccessSeal({ title, children }: { title: string; children?: Rea
         <b className="success__title">{title}</b>
         {children && <div className="success__body">{children}</div>}
       </div>
+    </div>
+  );
+}
+
+/** Caja con marco rojo e icono, como «OBJETIVO:» o «REGLA:» en las hojas impresas. */
+export function Callout({
+  icon,
+  label,
+  tone = "blood",
+  children,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  tone?: "blood" | "pumpkin";
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={`callout callout--${tone}`}>
+      <span className="callout__icon">{icon}</span>
+      <p>
+        <b className="callout__label">{label}:</b> {children}
+      </p>
+    </div>
+  );
+}
+
+/** Banda roja de la regla de oro de la gymkana. */
+export function GoldenRule() {
+  return (
+    <div className="golden-rule">
+      <PentagramIcon size={40} />
+      <p>
+        <b>Regla de oro:</b> si no hay foto o vídeo… no ha pasado.
+      </p>
     </div>
   );
 }

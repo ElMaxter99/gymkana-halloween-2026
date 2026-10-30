@@ -94,6 +94,8 @@ export default function Dashboard({ initial, timeZone }: { initial: Overview; ti
       <header className="admin-header">
         <h1>Panel del coordinador</h1>
         <nav>
+          <Link href="/admin/equipos">Equipos y códigos</Link>
+          <Link href="/admin/partidas">Partidas</Link>
           <Link href="/admin/qr">Puntos QR</Link>
           <button type="button" className="inline btn-ghost" onClick={logout}>
             Cerrar sesión
@@ -213,7 +215,10 @@ export default function Dashboard({ initial, timeZone }: { initial: Overview; ti
 
       <section className="panel" aria-labelledby="progress-title">
         <h2 id="progress-title">Progreso por equipo</h2>
-        <p className="muted small">Hora del primer escaneo de cada equipo en cada QR activo (entre paréntesis, escaneos totales).</p>
+        <p className="muted small">
+          Hora del primer escaneo de cada equipo en cada QR activo (entre paréntesis, escaneos totales). Cada equipo
+          tiene que encontrar {data.qrGoal}; cuáles le tocan se decide fuera de la web.
+        </p>
         {data.teams.length === 0 ? (
           <p className="muted">Todavía no se ha registrado ningún equipo.</p>
         ) : (
@@ -223,7 +228,7 @@ export default function Dashboard({ initial, timeZone }: { initial: Overview; ti
                 <tr>
                   <th>Equipo</th>
                   {activePoints.map((p) => <th key={p.id}>{p.title}</th>)}
-                  <th>Encontrados</th>
+                  <th>Ubicaciones (objetivo {data.qrGoal})</th>
                 </tr>
               </thead>
               <tbody>
@@ -243,7 +248,10 @@ export default function Dashboard({ initial, timeZone }: { initial: Overview; ti
                           <td key={p.id} className="cell-no" aria-label="Sin escanear">—</td>
                         );
                       })}
-                      <td>{found}/{activePoints.length}</td>
+                      <td className={found >= data.qrGoal ? "cell-yes" : undefined}>
+                        {found >= data.qrGoal ? "✓ " : ""}
+                        {found}/{data.qrGoal}
+                      </td>
                     </tr>
                   );
                 })}

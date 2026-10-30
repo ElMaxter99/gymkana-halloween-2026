@@ -19,8 +19,8 @@
   --muted-light: #6b4a33;
   --ok: #3f7d32;
 
-  --title: var(--font-title), "UnifrakturCook", Georgia, "Times New Roman", serif;
-  --print: var(--font-print), "Goudy Old Style", Garamond, Georgia, serif;
+  --title: var(--font-title), "Rockwell Extra Bold", "Roboto Slab", Georgia, serif;
+  --print: var(--font-body), "Roboto Condensed", "Arial Narrow", sans-serif;
   --body: var(--font-body), "Roboto Condensed", "Arial Narrow", system-ui, -apple-system, sans-serif;
 
   --radius: 6px;
@@ -103,12 +103,19 @@ h1, h2, h3 { margin: 0; line-height: 1.1; }
 
 .title {
   font-family: var(--title);
-  font-weight: 800;
-  letter-spacing: 0.02em;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
 }
+.page-title { font-size: clamp(1.7rem, 8.5vw, 2.2rem); line-height: 1.05; margin: 4px 0 6px; }
+
+/* Títulos a dos tintas, como en las hojas */
+.accent { color: var(--pumpkin); }
+.accent-red { color: var(--blood); }
 
 .label {
   font-family: var(--print);
+  font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   font-size: 0.85rem;
@@ -160,9 +167,10 @@ h1, h2, h3 { margin: 0; line-height: 1.1; }
 
 .poster__title {
   font-family: var(--title);
-  font-weight: 800;
-  font-size: clamp(2.6rem, 14vw, 3.6rem);
-  line-height: 0.92;
+  font-weight: 400;
+  font-size: clamp(2.3rem, 12.5vw, 3.2rem);
+  line-height: 0.95;
+  text-transform: uppercase;
   color: var(--ink);
   text-shadow: 1px 1px 0 rgba(89, 51, 34, 0.35);
 }
@@ -170,8 +178,10 @@ h1, h2, h3 { margin: 0; line-height: 1.1; }
 .poster__title span {
   display: block;
   color: var(--blood);
-  font-size: 0.82em;
+  font-size: 0.62em;
+  margin-top: 4px;
 }
+.poster__title span em { font-style: normal; color: var(--pumpkin); }
 
 .ribbon {
   display: inline-block;
@@ -254,22 +264,32 @@ h1, h2, h3 { margin: 0; line-height: 1.1; }
     0 10px 24px rgba(0, 0, 0, 0.45);
 }
 
-.parchment::before, .parchment::after {
+.parchment::before {
   content: "";
   position: absolute;
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--brown);
-  opacity: 0.55;
+  inset: 7px;
+  border: 1.5px solid rgba(134, 30, 23, 0.6);
+  border-radius: 10px;
   pointer-events: none;
 }
-.parchment::before { top: 10px; left: 10px; border-right: 0; border-bottom: 0; }
-.parchment::after { bottom: 10px; right: 10px; border-left: 0; border-top: 0; }
+.parchment::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  margin-left: -4.5px;
+  background: var(--blood);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
 
 .parchment h2 {
   font-family: var(--title);
-  font-weight: 800;
-  font-size: 1.7rem;
+  font-weight: 400;
+  font-size: 1.45rem;
+  text-transform: uppercase;
   color: var(--blood);
   text-align: center;
 }
@@ -302,10 +322,11 @@ h1, h2, h3 { margin: 0; line-height: 1.1; }
 .team-banner__team {
   display: block;
   font-family: var(--title);
-  font-weight: 800;
-  font-size: 1.7rem;
-  line-height: 1.05;
+  font-weight: 400;
+  font-size: 1.5rem;
+  line-height: 1.1;
   color: var(--cream);
+  text-transform: uppercase;
   overflow-wrap: anywhere;
 }
 
@@ -318,7 +339,7 @@ h1, h2, h3 { margin: 0; line-height: 1.1; }
   width: 52px;
   height: 52px;
   font-family: var(--title);
-  font-weight: 800;
+  font-weight: 400;
   font-size: 1.6rem;
   color: var(--cream);
   border-radius: 46% 54% 50% 50% / 52% 48% 52% 48%;
@@ -487,7 +508,7 @@ input[type="checkbox"] {
   padding: 4px 0;
 }
 .success .wax-seal { width: 64px; height: 64px; }
-.success__title { display: block; font-family: var(--title); font-weight: 800; font-size: 1.5rem; color: var(--ink); line-height: 1.1; }
+.success__title { display: block; font-family: var(--title); font-weight: 400; font-size: 1.25rem; color: var(--ink); line-height: 1.1; }
 .success__body { margin-top: 2px; }
 
 /* ---------- Punto QR ---------- */
@@ -497,8 +518,10 @@ input[type="checkbox"] {
 .point-head .label { color: var(--blood); display: block; margin-top: 4px; }
 .point-head h1 {
   font-family: var(--title);
-  font-weight: 800;
-  font-size: clamp(2rem, 10vw, 2.6rem);
+  font-weight: 400;
+  font-size: clamp(1.6rem, 8vw, 2.1rem);
+  line-height: 1.08;
+  text-transform: uppercase;
   color: var(--ink);
   margin-top: 2px;
   overflow-wrap: anywhere;
@@ -522,7 +545,7 @@ input[type="checkbox"] {
   border-radius: var(--radius);
   background: rgba(255, 240, 204, 0.5);
 }
-.stat-tile b { display: block; font-family: var(--title); font-weight: 800; font-size: 2.3rem; line-height: 1; color: var(--blood); }
+.stat-tile b { display: block; font-family: var(--title); font-weight: 400; font-size: 2rem; line-height: 1; color: var(--blood); }
 
 .list { list-style: none; margin: 0; padding: 0; }
 .list li {
@@ -549,7 +572,7 @@ input[type="checkbox"] {
   padding-bottom: 12px;
   border-bottom: 1px solid var(--line-dark);
 }
-.admin-header h1 { font-family: var(--title); font-weight: 800; font-size: 2rem; color: var(--cream); }
+.admin-header h1 { font-family: var(--title); font-weight: 400; font-size: 1.6rem; color: var(--cream); }
 .admin-header nav { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .admin-header nav a { min-height: 40px; display: inline-flex; align-items: center; }
 
@@ -596,8 +619,8 @@ input[type="checkbox"] {
 }
 .panel h2 {
   font-family: var(--title);
-  font-weight: 800;
-  font-size: 1.5rem;
+  font-weight: 400;
+  font-size: 1.2rem;
   color: var(--parchment);
   margin-bottom: 4px;
 }
@@ -623,7 +646,7 @@ input[type="checkbox"] {
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
 th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line-dark); white-space: nowrap; }
-th { color: var(--gold); font-family: var(--print); font-weight: 400; letter-spacing: 0.04em; position: sticky; top: 0; background: var(--ink-2); }
+th { color: var(--gold); font-family: var(--print); font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.04em; position: sticky; top: 0; background: var(--ink-2); }
 tbody tr:hover td { background: rgba(255, 240, 204, 0.04); }
 td.time { font-variant-numeric: tabular-nums; color: var(--muted-dark); }
 td.team { color: var(--parchment); font-weight: 700; }
@@ -671,7 +694,7 @@ details ul { margin: 4px 0 8px; padding-left: 20px; }
   box-shadow: inset 0 0 0 3px var(--parchment), inset 0 0 0 5px var(--brown);
   break-inside: avoid;
 }
-.qr-card h2 { font-family: var(--title); font-weight: 800; font-size: 1.5rem; color: var(--blood); margin-bottom: 8px; }
+.qr-card h2 { font-family: var(--title); font-weight: 400; font-size: 1.25rem; color: var(--blood); margin-bottom: 8px; }
 .qr-card img { width: 100%; max-width: 230px; height: auto; background: #fff; padding: 8px; border-radius: 4px; }
 .qr-card .url { font-family: ui-monospace, monospace; font-size: 0.72rem; word-break: break-all; color: var(--brown); margin-top: 6px; }
 
@@ -708,3 +731,145 @@ details ul { margin: 4px 0 8px; padding-left: 20px; }
   .page-wide { padding: 0; }
   .qr-card { box-shadow: none; border: 3px double var(--brown); background: #fff; }
 }
+
+/* ---------- Selector de equipos fijos ---------- */
+
+.team-picker { border: 0; margin: 18px 0 0; padding: 0; min-width: 0; }
+.team-picker legend { font-weight: 700; margin-bottom: 8px; padding: 0; }
+.team-picker__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.team-option { position: relative; margin: 0; font-weight: 400; cursor: pointer; }
+.team-option input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.team-option__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 104px;
+  padding: 12px 8px;
+  text-align: center;
+  background: rgba(255, 240, 204, 0.7);
+  border: 2px solid rgba(89, 51, 34, 0.45);
+  border-radius: var(--radius);
+  transition: transform 0.1s ease, border-color 0.15s ease;
+}
+.team-option__emblem { font-size: 2.3rem; line-height: 1; }
+.team-option__name { font-family: var(--title); font-weight: 400; font-size: 1.1rem; text-transform: uppercase; line-height: 1.1; color: var(--ink); overflow-wrap: anywhere; }
+.team-option input:checked + .team-option__card {
+  background: var(--ink-2);
+  border-color: var(--gold);
+  box-shadow: inset 0 0 0 2px var(--blood);
+}
+.team-option input:checked + .team-option__card .team-option__name { color: var(--cream); }
+.team-option input:checked + .team-option__card::after {
+  content: "✓ elegido";
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+.team-option input:focus-visible + .team-option__card { outline: 3px solid var(--pumpkin); outline-offset: 2px; }
+.team-picker[aria-invalid="true"] .team-option__card { border-color: var(--blood); }
+.team-picker + label { margin-top: 18px; }
+
+.code-state { font-weight: 700; }
+.code-state--on { color: #8fdc7a; }
+.code-state--off { color: var(--pumpkin); }
+
+/* ---------- Elementos de las hojas impresas ---------- */
+
+.callout {
+  position: relative;
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  gap: 12px;
+  align-items: center;
+  margin: 14px 0;
+  padding: 12px 14px;
+  color: var(--ink);
+  background: rgba(255, 240, 204, 0.55);
+  border: 2px solid var(--blood);
+  border-radius: 12px 4px 12px 4px;
+  box-shadow: inset 0 0 0 3px rgba(242, 223, 176, 0.9), inset 0 0 0 4px rgba(134, 30, 23, 0.35);
+}
+.callout p { margin: 0; font-size: 1.05rem; font-weight: 600; line-height: 1.35; }
+.callout__icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  color: var(--blood);
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+.callout__label { text-transform: uppercase; color: var(--blood); font-weight: 800; letter-spacing: 0.02em; }
+.callout--pumpkin { border-color: var(--pumpkin); }
+.callout--pumpkin .callout__icon, .callout--pumpkin .callout__label { color: var(--pumpkin); }
+/* Sobre fondo oscuro */
+.page > .callout { background: var(--parchment); }
+
+.golden-rule {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 12px;
+  align-items: center;
+  margin: 16px 0;
+  padding: 14px 16px;
+  color: var(--cream);
+  background: linear-gradient(180deg, #8f231b, var(--blood) 60%, #6c1611);
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 2px #5a120d, inset 0 0 0 4px rgba(184, 138, 50, 0.7), 0 6px 16px rgba(0, 0, 0, 0.45);
+}
+.golden-rule svg { width: 52px; height: 52px; padding: 6px; color: var(--gold); background: var(--ink); border-radius: 50%; }
+.golden-rule p { margin: 0; font-family: var(--title); font-size: 1.1rem; line-height: 1.25; text-transform: uppercase; }
+.golden-rule b { display: block; font-weight: 400; color: var(--gold); font-size: 1.25em; }
+
+.rules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: rule;
+}
+.rules li {
+  counter-increment: rule;
+  position: relative;
+  padding: 7px 0 7px 30px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.rules li::before {
+  content: counter(rule);
+  position: absolute;
+  left: 4px;
+  top: 7px;
+  font-family: var(--title);
+  font-size: 0.95rem;
+  color: rgba(89, 51, 34, 0.45);
+}
+.rules strong { color: var(--blood); }
+
+.heading-icons { display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--ink); }
+.heading-icons svg { flex: 0 0 auto; }
+
+.team-heading { display: inline-flex; align-items: center; gap: 8px; }
+.team-heading svg { flex: 0 0 auto; }
+
+.wax-seal--blood svg { width: 72%; height: 72%; }
+.team-option__emblem { display: grid; place-items: center; height: 52px; }
+.stat-tile b small { font-size: 0.55em; color: var(--brown); }
+
+/* ---------- Partidas ---------- */
+.alert--ok { color: #d9f5cf; background: rgba(63, 125, 50, 0.25); border: 2px solid #6fcf5a; }
+label.confirm { display: flex; gap: 10px; align-items: flex-start; font-weight: 600; color: var(--cream); }
+label.confirm input { flex: 0 0 auto; margin-top: 2px; }

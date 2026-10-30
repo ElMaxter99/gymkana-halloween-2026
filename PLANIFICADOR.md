@@ -44,23 +44,32 @@ RLS activado en todo y sin políticas → solo el servidor (service role) accede
 - [x] Cabeceras de seguridad y `revoke` de permisos públicos en el esquema
 - [x] Pruebas: 33 comprobaciones HTTP + recorrido en Chromium (móvil y escritorio) contra un doble de PostgREST
 
+### Fase 1c — Equipos fijos, hojas del sobre y partidas ✅
+- [x] Equipos fijos Calabaza, Fantasma, Bruja y Zombie; los jugadores ya no crean equipos
+- [x] Código opcional por equipo, gestionado en `/admin/equipos`
+- [x] Estilo de las hojas impresas: slab serif a dos tintas, cajas «OBJETIVO:», banner «Regla de oro», emblemas SVG
+- [x] Página `/reglas` con la hoja de reglas (los retos de los sobres 0–4 no se publican)
+- [x] 4 ubicaciones con QR y textos de serie; objetivo de 2 por equipo (`QR_PER_TEAM`)
+- [x] `/admin/partidas`: guardar copia y empezar de cero, restaurar (con copia automática), descargas CSV/JSON
+- [ ] Sobre 3 · El mapa del muerto (fichas pendientes)
+
 ### Fase 2 — Configuración (pendiente, Álvaro)
+- [ ] Usar la clave SECRETA de Supabase (no la publicable) y volver a ejecutar `supabase/schema.sql`
 - [ ] Crear proyecto Supabase y ejecutar `supabase/schema.sql`
 - [ ] Crear bot de Telegram y obtener `TELEGRAM_CHAT_ID`
 - [ ] Importar el repo en Vercel y configurar variables de entorno
 - [ ] Decidir dominio definitivo
 
 ### Fase 3 — Contenido (pendiente)
-- [ ] Definir los 2–3 puntos QR reales (título + instrucciones) en `/admin/qr`
-- [ ] Desactivar o editar los QR de ejemplo
+- [x] Ubicaciones y textos de los QR (Parkour maldito, Rocódromo, Zigzag, El Anfiteatro)
+- [ ] Decidir qué 2 ubicaciones toca a cada equipo (fuera de la web)
 - [ ] Imprimir el QR de registro y los de cada punto desde el dominio definitivo
 
 ### Fase 4 — Ensayo general
 - [ ] Crear 2–3 equipos de prueba con 2 móviles cada uno (iOS y Android, con datos móviles)
 - [ ] Probar código incorrecto y nombre de equipo duplicado
 - [ ] Escanear cada QR impreso; comprobar panel y Telegram
-- [ ] Borrar datos de prueba antes del evento:
-      `delete from scan_events; delete from players; delete from teams;`
+- [ ] Antes del evento: `/admin/partidas` → «Guardar copia y empezar partida nueva»
 
 ## Pruebas de aceptación
 

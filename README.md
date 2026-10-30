@@ -1,182 +1,223 @@
 # 🎃 Gymkana Halloween 2026
 
-**La web que da vida a tu aventura.** Una mini web móvil que acompaña a una gymkana de Halloween que se juega en papel: los jugadores registran su equipo, y cuando encuentran un QR escondido la web les muestra la prueba, les recuerda de qué equipo son y avisa al organizador.
+**La web que da vida a tu aventura.** Una mini web móvil que acompaña a una gincana de Halloween que se juega en papel. Los jugadores se unen a su equipo y, cuando encuentran un QR escondido, la web les muestra la prueba, les recuerda de qué equipo son y avisa al organizador.
 
 ![Gymkana Halloween 2026 — La web que da vida a tu aventura](public/branding/portada-gymkana-halloween-2026.webp)
 
-> La imagen es la referencia visual del evento. La web no la usa como fondo: toma su lenguaje (pergamino, sellos de lacre, rojo sangre, oro envejecido, murciélagos y casas encantadas) y lo aplica a componentes HTML reales.
+> La imagen es la referencia visual del evento. La web no la usa como fondo: copia el lenguaje de las hojas impresas y lo aplica a componentes HTML reales. Eso incluye los títulos en slab serif gruesa a dos tintas, las cajas «OBJETIVO:» con marco rojo, el banner de la «Regla de oro», los sellos de lacre, las calaveras, las velas y los murciélagos.
 
 ---
 
 ## 1. La experiencia de juego
 
-1. **Antes de empezar**, todos escanean el QR general de registro. El primero de cada grupo **crea el equipo** e inventa un código secreto; los demás **se unen** eligiendo el equipo de la lista y escribiendo ese código.
-2. **Durante la gymkana**, el juego es analógico: mapas, sobres y objetivos en papel.
-3. En 2–3 lugares hay **QR escondidos**. Al escanearlos, la web muestra «Álvaro, perteneces al equipo Los Lobos», el título del punto y las instrucciones de la prueba, y **registra el escaneo** en el servidor.
-4. El equipo hace la prueba (foto o vídeo) y la **envía por WhatsApp** al organizador, que decide si es válida.
-5. El organizador ve la actividad **en directo** en su panel y recibe un aviso en **Telegram**.
+Cada equipo recibe un **sobre** con:
 
-Escanear un QR solo demuestra que alguien con esa sesión abrió esa URL; **no valida la prueba**. La web lo dice así en todas las pantallas.
+| Hoja | Contenido | ¿Está en la web? |
+|---|---|---|
+| Reglas de la gincana | 9 reglas, objetivo, regla de oro y victoria | **Sí**, en `/reglas` |
+| 0 · Un amigo es un tesoro | Retos con gente durante toda la noche | No (se abre en orden) |
+| 1 · La casa maldita | Objetos dentro de la casa | No |
+| 2 · Los objetos perdidos | Objetos fuera de la casa | No |
+| 3 · El mapa del muerto | Lleva a las ubicaciones con QR | Pendiente: fichas aún en preparación |
+| 4 · El ritual | El último sobre | No |
+
+Los retos de los sobres **no se publican en la web** a propósito: se abren en orden y publicarlos destriparía el juego.
+
+Cómo se usa la web:
+
+1. **Al empezar**, todos escanean el QR de registro, escriben su nombre y eligen su equipo: **Calabaza, Fantasma, Bruja o Zombie**. Si el organizador ha puesto código a ese equipo, lo escriben.
+2. **Durante la gincana** el juego es analógico. Hay 4 ubicaciones con QR (**Parkour maldito, Rocódromo, Zigzag y El Anfiteatro**) y **cada equipo tiene que encontrar 2**. Qué dos le tocan a cada equipo se decide fuera de la web, así que puede cambiarse a última hora.
+3. Al escanear un QR, la web muestra «Álvaro, perteneces al equipo Zombie», la prueba de esa ubicación y cuántas llevan («1 de 2»), y **registra el escaneo**.
+4. El equipo hace la prueba y la **envía por WhatsApp**. El organizador la valida y reparte los puntos en papel. *Si no hay foto o vídeo… no ha pasado.*
+5. El organizador lo ve todo **en directo** en su panel y recibe un aviso en **Telegram**.
+
+Escanear un QR solo demuestra que alguien con esa sesión abrió esa URL; **no valida la prueba**.
 
 ## 2. Funcionalidades
 
 ### Implementadas
 
-- Portada temática con «Crear equipo», «Unirme a un equipo», «Cómo se juega» y un acceso discreto al panel.
-- Registro de jugadores: crear equipo (nombre + código) o unirse (lista + código), con validación en cliente y servidor y errores claros.
-- Protección frente a duplicados: un móvil ya registrado no puede registrarse otra vez sin pulsar «No soy yo»; al hacerlo, el jugador anterior se da de baja (sus escaneos se conservan).
-- Pantalla de equipo (`/equipo`): jugadores, número de escaneos, QR distintos encontrados y actividad reciente del equipo.
-- Páginas de QR (`/p/<slug>`): equipo del jugador, título e instrucciones, sello de «Escaneo registrado» con la hora del servidor y aviso si el equipo ya lo había escaneado.
-- QR desconocidos o desactivados: página «Aquí no hay nada…».
-- Panel privado (`/admin`): contadores, actividad en orden cronológico con filtros por equipo, jugador y punto, marca del primer escaneo, matriz de progreso equipo × QR, equipos y jugadores, indicador «En directo» y actualización automática.
-- Gestión de QR (`/admin/qr`): crear, editar, activar o desactivar puntos e imprimir los códigos QR (incluido el de registro).
-- Avisos de Telegram por cada escaneo, equipo nuevo y jugador nuevo.
-- Diseño mobile-first, contraste alto, errores con icono y texto (no solo color), y animaciones sutiles que se desactivan con `prefers-reduced-motion`.
+- **Portada** con «Unirme a mi equipo», «Reglas de la gincana», «Cómo se juega», la regla de oro y un acceso discreto al panel.
+- **Reglas** (`/reglas`) con el texto de la hoja impresa.
+- **Registro** (`/registro`): nombre más una de las cuatro tarjetas de equipo. El código solo se pide si el equipo lo tiene. Hay validación en cliente y servidor.
+- **Equipos fijos**: los jugadores no pueden crear equipos. La API rechaza cualquier intento.
+- **Sin duplicados**: un móvil ya registrado no puede registrarse otra vez sin pulsar «No soy yo», y al hacerlo el jugador anterior se da de baja (sus escaneos se conservan).
+- **Pantalla de equipo** (`/equipo`): jugadores, ubicaciones encontradas sobre el objetivo, escaneos y actividad reciente.
+- **Páginas de QR** (`/p/<slug>`): equipo y emblema del jugador, prueba de la ubicación, sello «Escaneo registrado» con la hora del servidor, progreso «X de 2» y aviso si es repetido.
+- **QR desconocidos o desactivados**: página «Aquí no hay nada…».
+- **Panel** (`/admin`):
+  - contadores y actividad en directo, con filtros por equipo, jugador y punto;
+  - marca «1.º» en el primer escaneo de cada equipo en cada punto;
+  - matriz de progreso con el objetivo de 2 ubicaciones por equipo;
+  - lista de equipos y jugadores.
+- **Equipos y códigos** (`/admin/equipos`): poner, cambiar o quitar el código de cada equipo, ver bloqueos por intentos fallidos y activar o desactivar equipos.
+- **Puntos QR** (`/admin/qr`): editar textos, crear, activar o desactivar puntos e imprimir los QR.
+- **Partidas** (`/admin/partidas`):
+  - **«Guardar copia y empezar partida nueva»** guarda jugadores y escaneos en una copia y deja la partida a cero;
+  - **«Restaurar esta partida»** la vuelve a poner en juego tal cual;
+  - descargas en CSV (Excel) y JSON.
+- **Telegram**: un aviso por escaneo y otro por cada jugador nuevo.
+- **Diseño**: mobile-first, contraste alto, errores con icono y texto (no solo color), y animaciones que se desactivan con `prefers-reduced-motion`.
 
 ### Pendientes o fuera de alcance
 
-- Sin puntuaciones, clasificación ni validación de pruebas (decisión del evento: las evidencias van por WhatsApp).
-- No se suben fotos ni vídeos.
-- Sin cola offline: sin cobertura, el escaneo no se registra hasta recargar con conexión.
-- El panel usa sondeo cada 5 s, no Supabase Realtime (ver §10).
-- No hay gestión de equipos desde el panel (renombrar o borrar): se hace en Supabase.
+- Las fichas del **sobre 3 (El mapa del muerto)**.
+- Puntuaciones y clasificación: las reparte el organizador fuera de la web, como dicen las hojas.
+- La web no guarda qué ubicaciones tiene asignadas cada equipo (decisión del organizador). Solo cuenta cuántas ha encontrado.
+- No se suben fotos ni vídeos. Sin cobertura, el escaneo no se registra hasta recargar con conexión.
 
 ## 3. Stack
 
 | Pieza | Uso |
 |---|---|
-| **Next.js 16** (App Router) + **TypeScript** | Páginas, API y server actions en un único proyecto |
-| **Supabase** (PostgreSQL) | Equipos, jugadores, puntos QR y escaneos |
+| **Next.js 16** (App Router) + **TypeScript** | Páginas, API y server actions |
+| **Supabase** (PostgreSQL) | Equipos, jugadores, QR, escaneos y copias de partidas |
 | **Vercel** | Hosting |
 | **Telegram Bot API** | Avisos al organizador |
-| `qrcode` | Generación de los QR imprimibles |
+| `qrcode` | QR imprimibles |
 | CSS propio + `next/font` | Estilo sin frameworks; fuentes autoalojadas |
 
-Tipografías (descargadas en el build y servidas desde el propio dominio, con alternativas del sistema): **Grenze Gotisch** (títulos), **IM Fell English SC** (etiquetas de imprenta) y **Roboto Condensed** (texto).
+Tipografías, autoalojadas en el build y con alternativas del sistema: **Alfa Slab One** para los títulos (la slab gruesa de las hojas) y **Roboto Condensed** para el texto y las etiquetas.
 
 ## 4. Arquitectura y carpetas
 
 ```
 public/
-  branding/     portada-gymkana-halloween-2026.webp (README) · og-…jpg (vista previa al compartir)
-  textures/     pergamino.svg (ruido SVG de ~1 KB para el papel)
+  branding/     portada (README) y og-…jpg (vista previa al compartir)
+  textures/     pergamino.svg (ruido SVG de ~1 KB)
 src/
   app/
     page.tsx               Portada
-    registro/              Registro (página + formulario cliente)
+    reglas/                Reglas de la gincana
+    registro/              Registro (página + formulario cliente con las tarjetas de equipo)
     equipo/                Pantalla del equipo
     p/[slug]/              Página de cada QR (registra el escaneo en el servidor)
-    admin/                 Panel (Dashboard.tsx), login y gestión de QR (qr/ + actions.ts)
-    api/register           Crear equipo / unirse
-    api/leave              «No soy yo»: baja del jugador y borrado de la cookie
-    api/admin/*            login, logout y overview (datos del panel)
-    globals.css            Identidad visual (variables de color, pergamino, sellos, panel)
-    icon.svg               Favicon (calabaza)
+    admin/                 Panel (Dashboard.tsx) y login
+      equipos/             Códigos y estado de los equipos (server actions)
+      qr/                  Puntos QR e impresión
+      partidas/            Copias, partida nueva y restauración
+    api/register           Unirse a un equipo
+    api/leave              «No soy yo»
+    api/admin/*            login, logout, overview y archives/[id] (descargas)
+    globals.css            Identidad visual
   components/
-    ornaments.tsx          Murciélagos, calabaza, brújula, vela, telaraña, casa encantada, sellos e iconos (SVG)
-    ui.tsx                 TeamBanner, ErrorAlert, SuccessSeal
-  lib/
-    supabase.ts            Cliente con service role (solo servidor)
-    player.ts              Identidad del dispositivo (cookie → jugador)
-    admin-auth.ts          Sesión del organizador (cookie firmada con HMAC)
-    overview.ts            Consultas del panel
-    telegram.ts            Envío y formato de avisos
-    crypto.ts · validation.ts · format.ts
-supabase/schema.sql        Tablas, restricciones, RLS y QR de ejemplo
+    ornaments.tsx          SVG: murciélagos, calabaza, calaveras, vela, casa encantada, emblemas de equipo e iconos
+    ui.tsx                 TeamBanner, Callout («OBJETIVO:»), GoldenRule, ErrorAlert, SuccessSeal
+  lib/                     supabase, player, admin-auth, overview, telegram, crypto, validation, format
+supabase/schema.sql        Tablas, funciones, RLS, equipos fijos y QR de serie
 ```
 
-Todo acceso a datos se hace en el servidor con la service role key. El navegador nunca habla con Supabase directamente.
+Todo el acceso a datos se hace en el servidor con la clave secreta de Supabase. El navegador nunca habla con Supabase.
 
-## 5. Registro de jugadores y equipos
+## 5. Equipos y registro
 
-- **Crear**: nombre del jugador + nombre del equipo (único, sin distinguir mayúsculas ni espacios) + código de al menos 4 caracteres.
-- **Unirse**: el formulario solo recibe `id` y `nombre` de cada equipo; nunca códigos ni jugadores de otros equipos. El código no distingue mayúsculas.
-- El código se guarda con **scrypt + sal**. Tras **8 fallos seguidos** el equipo se bloquea **5 minutos**.
-- Al registrarse, el móvil recibe una cookie `httpOnly` (`gk_device`, 30 días) con un token aleatorio; en la base de datos solo se guarda su **hash SHA-256**.
-- Límites anti-spam configurables: `MAX_TEAMS` (40 por defecto) y `MAX_PLAYERS_PER_TEAM` (20).
-- Nombres saneados en el servidor: sin caracteres de control, espacios colapsados, máximo 40 caracteres.
+- Equipos fijos: **Calabaza 🎃, Fantasma 👻, Bruja 🧙 y Zombie 🧟**, creados por `schema.sql`. En la web cada uno tiene su emblema en SVG.
+- **El código es opcional y lo pone el organizador** en `/admin/equipos`; la idea es darlo en la hoja de cada equipo.
+  - Sin código, cualquiera entra al equipo solo con elegirlo, y el panel lo marca en naranja.
+  - El código se guarda con **scrypt + sal** y no distingue mayúsculas.
+  - Tras **8 fallos seguidos** el equipo se bloquea **5 minutos**. Poner un código nuevo lo desbloquea.
+- Al registrarse, el móvil recibe una cookie `httpOnly` (`gk_device`, 30 días) con un token aleatorio. En la base de datos solo se guarda su hash SHA-256.
+- El navegador solo recibe el id, el nombre y si el equipo pide código; nunca hashes ni jugadores de otros equipos.
+- Límite de jugadores por equipo: `MAX_PLAYERS_PER_TEAM` (20). Los nombres se sanean en el servidor.
 
-## 6. Funcionamiento de los QR
+## 6. Ubicaciones con QR
 
-- Cada punto tiene una URL `/p/<slug>`. Los slugs creados desde el panel llevan un sufijo aleatorio (`/p/el-viejo-cementerio-k8w3rtxq`) para que no se puedan adivinar.
+| Ubicación | URL | Prueba de serie |
+|---|---|---|
+| Parkour maldito | `/p/parkour-7qk2mz` | Todo el equipo debe participar en un vídeo donde se realice parte del circuito de parkour. |
+| Rocódromo | `/p/rocodromo-x4b9tw` | Vídeo de un integrante del equipo completándolo o aguantando arriba 10 segundos. |
+| Zigzag | `/p/zigzag-m3v8pd` | Recorred el zigzag en fila como una procesión de zombis: cada uno agarrado a los hombros del de delante, arrastrando los pies y sin soltaros. Grabad un vídeo de todo el recorrido. |
+| El Anfiteatro | `/p/anfiteatro-h6r2kc` | Recread una escena de una película de terror. |
+
+- Los textos se cambian en `/admin/qr`. Volver a ejecutar `schema.sql` no los pisa.
+- Objetivo por equipo: `QR_PER_TEAM` (2). Se muestra al jugador («1 de 2») y en el panel (✓ al completar).
 - Al abrir la página, el servidor comprueba que el punto existe y está activo, identifica al jugador por su cookie e **inserta el escaneo con la hora del servidor**.
-- Sin identificar → `/registro?next=/p/<slug>`; al terminar el registro vuelve automáticamente al QR. Solo se aceptan destinos `/p/...` (sin redirecciones abiertas).
+- Si el jugador no está identificado, va a `/registro?next=/p/<slug>` y al terminar vuelve solo al QR. No hay redirecciones abiertas.
+- Las URLs están en este repositorio: si es público, alguien podría verlas. Para hacerlas secretas, crea los puntos desde `/admin/qr` (con sufijo aleatorio) y desactiva estos.
 
 ### Escaneos repetidos
 
-**Decisión: se guardan todos**, también las recargas y los escaneos de varios móviles del mismo equipo. Para que no haya confusión:
-
-- el jugador ve si es la **primera vez** que su equipo registra ese QR o cuántas lleva;
-- el panel marca con **«1.º»** el primer escaneo de cada equipo en cada punto y la matriz de progreso muestra la hora del primero y el total;
-- Telegram añade «🔁 Repetido» cuando no es el primero.
-
-Si en algún momento se quiere ignorar los repetidos, basta con filtrar por la marca de primer escaneo; no hace falta tocar la base de datos.
+**Se guardan todos**: recargas y escaneos de varios móviles del mismo equipo incluidos.
+- El jugador ve si es la primera vez que su equipo registra ese QR.
+- El panel marca el primero con «1.º».
+- Telegram añade «🔁 Repetido».
+- El progreso cuenta ubicaciones **distintas**.
 
 ## 7. Panel privado
 
-- `/admin` → `/admin/login` si no hay sesión. La contraseña es `ADMIN_PASSWORD`; la sesión es una cookie `httpOnly`, `SameSite=Strict`, firmada con HMAC (`ADMIN_SESSION_SECRET`) y válida 12 h.
-- **Todas** las rutas y acciones de administración comprueban la sesión en el servidor (`/api/admin/overview` responde 401 sin ella; las server actions de `/admin/qr` también la verifican).
-- Se actualiza cada 5 s mientras la pestaña está visible y al volver a ella; el indicador «En directo» pasa a naranja si se pierde la conexión.
-- Muestra los 500 escaneos más recientes (los totales y la matriz cuentan todos).
-- En el móvil, la actividad se muestra como fichas apiladas para no perder columnas.
+- `/admin` redirige a `/admin/login` si no hay sesión. La contraseña es `ADMIN_PASSWORD`.
+- La sesión es una cookie `httpOnly`, `SameSite=Strict`, firmada con HMAC (`ADMIN_SESSION_SECRET`) y válida 12 h.
+- **Todas** las rutas, server actions y descargas comprueban la sesión en el servidor.
+- El panel se actualiza cada 5 s mientras la pestaña está visible. Si se pierde la conexión, el indicador «En directo» se pone naranja.
+- Muestra los 500 escaneos más recientes; los totales y la matriz cuentan todos.
+
+### Partidas: ensayos, copias y recuperación
+
+Pensado para hacer varias partidas de prueba y que el día del evento todo esté limpio:
+
+- **Guardar copia y empezar partida nueva** (pide marcar una casilla de confirmación):
+  - guarda jugadores y escaneos en `game_archives` y deja la partida a cero;
+  - **se mantienen equipos, códigos y QR**;
+  - los móviles dejan de estar identificados y hay que volver a registrarse.
+- **Restaurar esta partida**:
+  - vuelve a poner una copia en juego tal cual: **los móviles de esa partida vuelven a estar identificados** y los escaneos se recuperan;
+  - si la partida actual tiene datos, **antes se guarda como «Copia automática antes de restaurar…»**, así que restaurar por error tampoco pierde nada.
+- **Las copias no se pueden borrar desde la web.**
+- Guardar y restaurar son funciones de Postgres (`archive_game`, `restore_game`). Si algo falla a medias, no se borra nada.
+- Descargas: escaneos en **CSV** (separador `;`, se abre en Excel con acentos) y **JSON** legible (sin datos internos).
 
 ## 8. Telegram
 
-1. Habla con [@BotFather](https://t.me/BotFather) → `/newbot` y copia el token.
-2. Escribe cualquier cosa a tu bot (o añádelo a un grupo).
+1. Habla con [@BotFather](https://t.me/BotFather), envía `/newbot` y copia el token.
+2. Escribe al bot (o añádelo a un grupo).
 3. Abre `https://api.telegram.org/bot<TOKEN>/getUpdates` y copia `chat.id`.
 4. Configura `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID`.
 
-Mensaje de cada escaneo (datos sacados del registro guardado):
-
 ```
 🎃 NUEVO ESCANEO
-👥 Equipo: Los Lobos
+👥 Equipo: Zombie
 🧙 Jugador: Álvaro
-📍 Punto: El Viejo Cementerio
+📍 Punto: Parkour maldito
 🕒 Hora: 22:14
 ```
 
-- El envío ocurre **después** de guardar el escaneo y de responder al jugador (`after()` de Next.js), con un tiempo máximo de 5 s.
-- Si Telegram falla o no está configurado, el escaneo queda guardado y el jugador no nota nada; en los logs solo aparece el código de estado (nunca la URL con el token).
-- Para eventos con muchos escaneos por segundo, Telegram puede limitar envíos; el panel sigue siendo la fuente de verdad.
+El aviso se envía después de guardar el escaneo, con un límite de 5 s. Si Telegram falla o no está configurado, el juego sigue y en el log solo aparece el código de estado (nunca el token).
 
 ## 9. Modelo de datos (Supabase)
 
-| Tabla | Campos clave |
+| Tabla / función | Contenido |
 |---|---|
-| `teams` | `name`, `name_key` (único, minúsculas), `join_code_hash`, `failed_join_attempts`, `locked_until`, `active` |
+| `teams` | `name`, `name_key` (único), `join_code_hash` (null = sin código), intentos fallidos, `locked_until`, `active` |
 | `players` | `display_name`, `team_id`, `device_token_hash` (único), `active` |
-| `qr_points` | `slug` (único, `^[a-z0-9-]{3,64}$`), `title`, `instructions`, `sort_order`, `active` |
-| `scan_events` | `player_id`, `team_id`, `qr_point_id`, `scanned_at` (hora del servidor), `user_agent` |
+| `qr_points` | `slug`, `title`, `instructions`, `sort_order`, `active` |
+| `scan_events` | `player_id`, `team_id`, `qr_point_id`, `scanned_at` (servidor), `user_agent` |
+| `game_archives` | `label`, `archived_at`, contadores y `data` (versión legible + filas originales para restaurar) |
+| `archive_game(label)` / `restore_game(id)` | Guardar y empezar de cero / restaurar, cada una en una transacción |
 
-Seguridad de la base de datos:
-
-- **RLS activado en todas las tablas y sin políticas**: con la anon key no se puede leer ni escribir nada.
-- Además, el script **retira los permisos** que Supabase concede por defecto a `anon` y `authenticated`.
-- Solo el servidor accede, con `SUPABASE_SERVICE_ROLE_KEY`.
+Seguridad:
+- **RLS activado en todas las tablas y sin políticas.**
+- Además se **retiran los permisos** de `anon` y `authenticated` sobre tablas y funciones: con la clave pública no se puede leer nada ni ejecutar las funciones.
+- Solo el servidor accede, con la clave secreta.
 
 ## 10. Variables de entorno
 
-Copia `.env.example` a `.env.local`. Valores ficticios de ejemplo:
-
 ```bash
 SUPABASE_URL=https://tu-proyecto.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJ...clave-service-role...
+# Clave SECRETA: «Secret key» (sb_secret_…) o la «service_role» de las claves antiguas.
+# ¡No la «Publishable key» (sb_publishable_…)! Con esa la app recibe «permission denied».
+SUPABASE_SERVICE_ROLE_KEY=sb_secret_xxxxxxxxxxxx
 ADMIN_PASSWORD=una-frase-larga-que-solo-sepas-tu
 ADMIN_SESSION_SECRET=resultado-de-openssl-rand-base64-48
 TELEGRAM_BOT_TOKEN=123456:ABC-token-de-ejemplo
 TELEGRAM_CHAT_ID=123456789
 EVENT_TIMEZONE=Europe/Madrid
-MAX_TEAMS=40
 MAX_PLAYERS_PER_TEAM=20
+QR_PER_TEAM=2
 # Opcional: dominio para las vistas previas al compartir (en Vercel se detecta solo)
 SITE_URL=https://tu-dominio.vercel.app
 ```
 
-Ninguna variable lleva prefijo `NEXT_PUBLIC_`: ningún secreto llega al navegador. No se usa la anon key.
-
-Sobre el tiempo real: Supabase Realtime necesitaría exponer la anon key y crear políticas de lectura, lo que haría públicos los nombres y escaneos. Por eso el panel usa sondeo autenticado cada 5 s, suficiente para un evento de este tamaño.
+Ninguna variable lleva prefijo `NEXT_PUBLIC_`. El panel usa un refresco autenticado cada 5 s en vez de Supabase Realtime: Realtime obligaría a exponer la clave pública con permisos de lectura.
 
 ## 11. Instalación local
 
@@ -192,84 +233,92 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Abre http://localhost:3000. Comandos disponibles: `npm run dev`, `npm run build`, `npm run start` y `npm run typecheck`. El proyecto no tiene linter configurado; `npm run typecheck` y `npm run build` hacen la comprobación de tipos.
+Comandos: `npm run dev`, `npm run build`, `npm run start` y `npm run typecheck`. No hay linter configurado; `typecheck` y `build` comprueban los tipos.
 
 ## 12. Configurar la base de datos
 
-1. Crea un proyecto en [Supabase](https://supabase.com).
-2. *SQL Editor* → pega `supabase/schema.sql` completo → *Run*. Es idempotente: se puede volver a ejecutar.
-3. *Project Settings → API*: copia la URL y la **service_role** key en las variables de entorno.
-4. Los 3 QR de ejemplo se pueden editar o desactivar desde `/admin/qr`.
-
-Para borrar los datos de prueba antes del evento (conserva los QR):
-
-```sql
-delete from scan_events; delete from players; delete from teams;
-```
+1. *SQL Editor* → pega `supabase/schema.sql` completo → *Run*.
+   - Es **re-ejecutable** y sirve también para actualizar una base creada con una versión anterior del script.
+   - Crea los 4 equipos y los 4 QR de serie y añade las copias de partidas.
+   - Borra los QR de ejemplo antiguos (calabaza, cripta y bruja). Los equipos de prueba que hubiera no los borra: desactívalos en `/admin/equipos`.
+2. *Project Settings → API Keys*: copia la URL y la **clave secreta** en las variables.
+3. En `/admin/equipos`, pon el código de cada equipo si quieres usarlo.
 
 ## 13. Despliegue en Vercel
 
-1. Importa el repositorio en Vercel (detecta Next.js automáticamente).
-2. Añade las variables de entorno de §10 en *Settings → Environment Variables*.
-3. Despliega y abre la URL pública.
-4. Entra en `/admin/qr` **desde el dominio definitivo**: las URLs de los QR se generan con el dominio desde el que abres la página.
-5. Imprime los QR y escanéalos uno a uno con iOS y Android usando datos móviles.
+1. Importa el repositorio (Vercel detecta Next.js).
+2. Añade las variables de §10 en *Settings → Environment Variables* y despliega.
+3. Abre `/admin/qr` **desde el dominio definitivo** e imprime los QR. Las URLs se generan con el dominio desde el que abres la página.
+4. Escanea cada QR impreso con iOS y Android, usando datos móviles.
 
 ## 14. Cómo probar el flujo completo
 
-1. Móvil A: escanea el QR de registro → «Crear equipo» → nombre, equipo y código. Debe aparecer «¡Equipo creado!».
-2. Móvil B: escanea un QR de punto sin registrarse → te lleva al registro → «Unirme a un equipo» → prueba un código erróneo (error visible) y luego el correcto → vuelve solo al QR y muestra «Escaneo registrado».
-3. Móvil A: escanea el mismo QR → «Vuestro equipo ya había registrado este QR».
-4. `/equipo` en cualquiera de los dos móviles: 2 jugadores, escaneos y actividad.
-5. Ordenador: `/admin` → login → los escaneos aparecen sin recargar; prueba los filtros.
-6. Telegram: debe llegar un mensaje por escaneo.
-7. Escanea un QR desactivado o una URL inventada → «Aquí no hay nada…».
+1. En `/admin/equipos`, pon un código a un equipo y deja otro sin código.
+2. Móvil A: registro → equipo con código → prueba un código erróneo (error visible) y luego el correcto → «¡Ya estás dentro!».
+3. Móvil B: escanea un QR sin estar registrado → registro → equipo sin código → vuelve solo al QR → «Escaneo registrado · 1 de 2».
+4. `/equipo`, `/admin` (aparece sin recargar) y Telegram.
+5. `/admin/partidas` → «Guardar copia y empezar partida nueva» → los móviles piden registro otra vez → «Restaurar» → los móviles vuelven a estar identificados.
+6. Antes del evento: «Guardar copia y empezar partida nueva» para dejarlo todo de serie.
 
 ## 15. Pruebas realizadas en este repositorio
 
 Ejecutadas el 30/10/2026 sobre el build de producción (`next build` + `next start`).
 
-**No se ha probado contra un Supabase real, un bot de Telegram real ni Vercel**: no hay credenciales en este entorno. Para ejecutar el código real de la app de punta a punta se usó un **doble en memoria de la API PostgREST** (la que usa `supabase-js`). Reproduce las consultas, inserciones y restricciones de unicidad que usa la app; no reproduce RLS ni los permisos de Postgres.
+**No se ha probado la app contra un Supabase real, un bot de Telegram real ni Vercel.**
+- Para ejecutar la app de punta a punta se usó un **doble en memoria de la API PostgREST** que reproduce las consultas, restricciones y RPC que usa la app.
+- El SQL se probó por separado en **PostgreSQL 16 real**.
+- Contra el proyecto de Supabase del organizador solo se hizo una consulta de lectura con la clave publicable. Respondió `permission denied` en `teams` y `qr_points`, lo que confirma que las tablas existen y que la clave pública no puede leerlas.
+
+Resultados:
 
 - `npm run typecheck` y `npm run build`: sin errores ni avisos.
-- `supabase/schema.sql` aplicado en un PostgreSQL 16 local en la versión anterior: rechaza nombres de equipo duplicados (aunque cambien las mayúsculas) y slugs no válidos. El bloque de `revoke` añadido después no se ha ejecutado contra Supabase.
-- **33 comprobaciones HTTP, todas correctas**:
-  - crear equipo; nombre duplicado; mismo móvil registrándose dos veces; validaciones;
-  - unirse con código erróneo, correcto o con un `teamId` inválido; bloqueo tras 8 fallos;
-  - escaneo válido, repetido, desconocido y con slug inválido; redirección al registro y rechazo de `next` externos;
-  - pantalla de equipo; «No soy yo» (baja sin duplicados, con los escaneos conservados);
-  - el panel devuelve 401 o redirige sin sesión, rechaza cookies falsificadas y contraseñas incorrectas, y da datos correctos con sesión;
-  - cabeceras de seguridad y que la lista de equipos no expone códigos.
-- **Prueba de interfaz con Chromium (Playwright)** a 390×844 y 1280×900:
-  - crear equipo desde la portada; unirse desde un QR con código erróneo y luego correcto;
-  - escaneo, pantalla de equipo y QR inválido;
-  - login y panel; un escaneo nuevo aparece en el panel sin recargar;
-  - filtro por jugador; crear un punto en `/admin/qr` y abrir su URL.
-  - Resultado: **sin desplazamiento horizontal** en ninguna pantalla y animaciones desactivadas con `prefers-reduced-motion`. Los únicos errores de consola son los 401, 403 y 404 esperados de las pruebas negativas.
-- Telegram con un token falso: la API respondió 401, se registró «Telegram respondió 401» y el registro y los escaneos continuaron con normalidad. Sin variables de Telegram, no se intenta ningún envío.
+- **SQL en PostgreSQL 16**:
+  - el script se aplica dos veces seguidas sin errores y migra una base creada con la versión anterior;
+  - `archive_game` guarda jugadores y escaneos, vacía la partida y conserva equipos, códigos y QR;
+  - `restore_game` recupera jugadores con su identidad y escaneos, y los escaneos nuevos continúan la numeración;
+  - restaurar con partida en curso crea la copia automática;
+  - `anon` no puede ejecutar las funciones ni leer las copias.
+- **34 comprobaciones HTTP, todas correctas**:
+  - portada, reglas y los 4 equipos en orden;
+  - no se pueden crear equipos; validaciones; unirse sin código; móvil duplicado;
+  - escaneos válidos, repetidos, desconocidos e inválidos; redirección al registro;
+  - pantalla de equipo y baja de jugador;
+  - autenticación del panel en `/admin`, `/admin/qr` y `/admin/equipos`, y datos del panel;
+  - cabeceras de seguridad.
+- **23 comprobaciones en Chromium (Playwright)** a 390×844 y 1280×900, todas correctas:
+  - el organizador pone código; validaciones en el cliente; el código se pide solo cuando corresponde; código erróneo y correcto;
+  - registro desde un QR con vuelta al QR; el panel se actualiza solo; filtros; crear un QR desde el panel;
+  - bloqueo tras 8 fallos, visible en el panel, y desbloqueo al cambiar el código;
+  - guardar copia y partida nueva, descarga CSV, 401 sin sesión, copia automática y restauración con los móviles identificados de nuevo y todos los escaneos;
+  - movimiento reducido y **sin desplazamiento horizontal**.
+  - Los únicos errores de consola son los 401, 403 y 404 esperados de las pruebas negativas.
+- Telegram, en la ronda anterior: con un token falso responde 401, se registra y el juego continúa. Sin configurar, no se intenta enviar.
 
 ## 16. Seguridad y limitaciones conocidas
 
-- La cookie identifica un **navegador**, no a una persona. Si se abre el QR en otro navegador o en modo incógnito, pedirá registrarse de nuevo.
-- Un escaneo no prueba que la prueba se haya hecho; las evidencias van por WhatsApp.
-- El código de equipo es la única credencial para unirse: hay que compartirlo solo con el equipo.
-- La contraseña del panel es compartida. Es suficiente para un evento puntual; para algo permanente convendría Supabase Auth con MFA.
-- Los límites de spam son por equipo y globales; no hay limitación por IP.
-- Cabeceras: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin` (las URL de los QR no se filtran a otros sitios) y `Permissions-Policy` restrictiva.
-- La web no se indexa (`robots: noindex`).
-- Datos personales: solo nombres de pila y user agent. Borra los datos después del evento; si participan menores, informa a sus responsables.
+- La cookie identifica un **navegador**, no a una persona. En otro navegador o en modo incógnito hay que registrarse de nuevo.
+- Un escaneo no prueba que se haya hecho la prueba.
+- Un equipo sin código lo puede elegir cualquiera; pon códigos si te preocupa que alguien se cambie de equipo.
+- Contraseña de panel compartida: suficiente para un evento puntual.
+- Cabeceras: `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy: same-origin` y `Permissions-Policy` restrictiva. La web no se indexa.
+- Datos personales: solo nombres de pila y user agent. Las copias se guardan hasta que se borren a mano en Supabase; bórralas después del evento.
 
 ## 17. Configuración pendiente (manual)
 
-- [ ] Crear el proyecto de Supabase y ejecutar `supabase/schema.sql`.
-- [ ] Crear el bot de Telegram y obtener el `chat_id`.
-- [ ] Importar en Vercel y configurar las variables.
-- [ ] Escribir los textos reales de los QR en `/admin/qr` y desactivar los de ejemplo.
-- [ ] Imprimir los QR desde el dominio definitivo y hacer un ensayo con móviles reales.
+- [ ] Poner en `SUPABASE_SERVICE_ROLE_KEY` la **clave secreta**, no la publicable.
+- [ ] Ejecutar la última versión de `supabase/schema.sql`.
+- [ ] Configurar `ADMIN_PASSWORD` y `ADMIN_SESSION_SECRET` (y Telegram si se quiere).
+- [ ] Decidir si los equipos llevan código y ponerlo en `/admin/equipos`.
+- [ ] Pasar las fichas del sobre 3 (El mapa del muerto) si deben reflejarse en la web.
+- [ ] Imprimir los QR desde el dominio definitivo, hacer un ensayo y pulsar «Guardar copia y empezar partida nueva» antes del evento.
 
 ## 18. Notas para quien continúe el desarrollo
 
-- Colores y estilos están en variables de `src/app/globals.css` (`--parchment`, `--blood`, `--pumpkin`, `--gold`…). Las clases principales son `.parchment` (tarjetas), `.btn-seal` (acción principal), `.btn-wood` (secundaria), `.wax-seal` y `.panel` (admin).
-- Los adornos son SVG en `src/components/ornaments.tsx`; añade nuevos ahí.
-- La identidad del jugador se obtiene siempre con `getCurrentPlayer()`; la del organizador, con `isAdmin()` / `requireAdmin()`.
-- Cualquier consulta nueva debe hacerse en el servidor con `db()`; no añadas políticas RLS públicas.
+- Colores en variables de `globals.css` (`--parchment`, `--blood`, `--pumpkin`, `--gold`…).
+  - Clases de la página: `.parchment`, `.btn-seal`, `.btn-wood`, `.callout`, `.golden-rule`, `.wax-seal`.
+  - Clases del panel: `.panel`.
+  - Títulos a dos tintas: `.accent` o `.accent-red` dentro de un `.title`.
+- Iconos y emblemas en `src/components/ornaments.tsx` (`TeamEmblem` elige el emblema por nombre de equipo).
+- Identidad del jugador: `getCurrentPlayer()`. Organizador: `isAdmin()` / `requireAdmin()`. Objetivo de QR: `qrGoal()`.
+- Consultas siempre en el servidor con `db()`. No añadas políticas RLS públicas.
+- Si cambias columnas de `players` o `scan_events`, actualiza `restore_game` en `schema.sql`.
