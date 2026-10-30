@@ -6,7 +6,7 @@ import { formatTime } from "@/lib/format";
 import { qrGoal } from "@/lib/validation";
 import { countPointsOnRoute } from "@/lib/overview";
 import { TeamBanner } from "@/components/ui";
-import { ArrowLeftIcon, Divider, SkullCrossbones } from "@/components/ornaments";
+import { ArrowLeftIcon, Divider, EnvelopeIcon, SkullCrossbones } from "@/components/ornaments";
 
 export const dynamic = "force-dynamic";
 
@@ -119,6 +119,9 @@ export default async function TeamPage() {
         )}
       </section>
 
+      <Link className="button btn-seal" href="/sobres">
+        <EnvelopeIcon /> Vuestros sobres
+      </Link>
       <Link className="button btn-wood" href="/reglas">
         <SkullCrossbones size={26} /> Reglas de la gincana
       </Link>

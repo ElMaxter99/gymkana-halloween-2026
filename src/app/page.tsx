@@ -42,7 +42,10 @@ export default async function Home() {
         <>
           <TeamBanner playerName={player.displayName} teamName={player.teamName} />
           <div className="button-row">
-            <Link className="button btn-seal" href="/equipo">
+            <Link className="button btn-seal" href="/sobres">
+              <EnvelopeIcon /> Vuestros sobres
+            </Link>
+            <Link className="button btn-wood" href="/equipo">
               <UsersIcon /> Ver mi equipo
             </Link>
             <Link className="button btn-wood" href="/reglas">

@@ -56,6 +56,12 @@ RLS activado en todo y sin políticas → solo el servidor (service role) accede
 - [x] URLs de QR aleatorias por base de datos (el repositorio es público)
 - [x] Guía de Telegram en `docs/TELEGRAM.md`
 
+### Fase 1d — Sobres en la app ✅
+- [x] Sobres 0–4 en `/sobres`, sellados hasta que el organizador los abre en `/admin/sobres`
+- [x] Personalización por equipo (nombre, inicial, ruta y mapa del sobre 3; QR escaneados marcados)
+- [x] Rutas del mapa precargadas en `schema.sql` (editables en `/admin/qr`); «Nueva partida» vuelve a sellar los sobres
+- [x] README reescrito como portfolio y guía para reutilizarlo otros años
+
 ### Fase 2 — Configuración (pendiente, Álvaro)
 - [ ] Usar la clave SECRETA de Supabase (no la publicable) y volver a ejecutar `supabase/schema.sql`
 - [ ] Crear proyecto Supabase y ejecutar `supabase/schema.sql`
@@ -65,7 +71,8 @@ RLS activado en todo y sin políticas → solo el servidor (service role) accede
 
 ### Fase 3 — Contenido (pendiente)
 - [x] Ubicaciones y textos de los QR (Parkour maldito, Rocódromo, Zigzag, El Anfiteatro)
-- [ ] Marcar en `/admin/qr` la ruta de cada QR según el mapa del muerto
+- [x] Rutas de los QR según el mapa del muerto (precargadas)
+- [ ] Día del evento: abrir los sobres en `/admin/sobres` a medida que avance la noche
 - [ ] Imprimir el QR de registro y los de cada punto desde el dominio definitivo
 
 ### Fase 4 — Ensayo general
