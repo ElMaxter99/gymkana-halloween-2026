@@ -50,3 +50,7 @@ export function scanMessage(scan: {
 export function joinMessage(player: string, team: string): string {
   return `🦇 NUEVO JUGADOR\n👥 Equipo: ${team}\n🧙 Jugador: ${player}`;
 }
+
+export function rejoinMessage(player: string, team: string): string {
+  return `📱 CAMBIO DE MÓVIL\n👥 Equipo: ${team}\n🧙 Jugador: ${player} ha entrado desde otro móvil`;
+}

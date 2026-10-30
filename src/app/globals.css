@@ -1255,3 +1255,26 @@ label.confirm input { flex: 0 0 auto; margin-top: 2px; }
 .panel--danger { border-color: #8f231b; }
 tr.is-undone td { opacity: 0.55; text-decoration: line-through; }
 tr.is-undone td:last-child, tr.is-undone .tag { text-decoration: none; }
+
+/* «Ya me registré»: lista de jugadores del equipo */
+.teammates { border: 0; margin: 16px 0 0; padding: 0; min-width: 0; }
+.teammates legend { font-weight: 700; margin-bottom: 8px; padding: 0; }
+.teammates[aria-invalid="true"] .teammate span { border-color: var(--blood); }
+.teammates__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.teammate { position: relative; margin: 0; cursor: pointer; }
+.teammate input { position: absolute; top: 0; left: 0; width: 1px; height: 1px; min-height: 0; margin: 0; padding: 0; opacity: 0; pointer-events: none; }
+.teammate span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 8px 10px;
+  text-align: center;
+  font-weight: 700;
+  background: rgba(255, 240, 204, 0.7);
+  border: 2px solid rgba(89, 51, 34, 0.45);
+  border-radius: var(--radius);
+  overflow-wrap: anywhere;
+}
+.teammate input:checked + span { color: var(--cream); background: var(--ink-2); border-color: var(--gold); }
+.teammate input:focus-visible + span { outline: 3px solid var(--pumpkin); outline-offset: 2px; }

@@ -52,7 +52,8 @@ RLS activado en todo y sin políticas → solo el servidor (service role) accede
 - [x] 4 ubicaciones con QR y textos de serie; objetivo de 2 por equipo (`QR_PER_TEAM`)
 - [x] `/admin/partidas`: guardar copia y empezar de cero, restaurar (con copia automática), descargas CSV/JSON
 - [x] Sobre 3 · El mapa del muerto: rutas por equipo editables en `/admin/qr` (no se guardan en el repositorio)
-- [x] Códigos de equipo visibles y editables en `/admin/equipos`
+- [x] Códigos de equipo visibles y editables en `/admin/equipos` (solo cifras: teclado numérico en el móvil)
+- [x] «Ya me registré»: entrar como jugador existente desde otro móvil (el anterior deja de estar identificado)
 - [x] URLs de QR aleatorias por base de datos (el repositorio es público)
 - [x] Guía de Telegram en `docs/TELEGRAM.md`
 

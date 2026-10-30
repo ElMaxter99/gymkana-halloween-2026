@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/supabase";
 import { getCurrentPlayer, safeNext } from "@/lib/player";
+import { TEAM_CODE_RE } from "@/lib/validation";
 import { ArrowLeftIcon, Bat } from "@/components/ornaments";
 import RegistroForm, { type TeamOption } from "./RegistroForm";
 
@@ -12,7 +13,7 @@ export default async function RegistroPage({ searchParams }: { searchParams: Pro
 
   const { data, error } = await db()
     .from("teams")
-    .select("id, name, slug, join_code_hash")
+    .select("id, name, slug, join_code, join_code_hash")
     .eq("active", true)
     .order("sort_order")
     .order("created_at");
@@ -24,6 +25,8 @@ export default async function RegistroPage({ searchParams }: { searchParams: Pro
     name: t.name,
     slug: t.slug,
     requiresCode: Boolean(t.join_code_hash),
+    // Al navegador solo llega si el código es numérico (para el teclado), nunca el código.
+    numericCode: !t.join_code || TEAM_CODE_RE.test(t.join_code),
   }));
 
   return (
