@@ -9,6 +9,7 @@ import { ArrowLeftIcon, Candle, Divider } from "@/components/ornaments";
 export default function AdminLogin() {
   const router = useRouter();
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -20,7 +21,7 @@ export default function AdminLogin() {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ password, name }),
       });
       if (res.ok) {
         router.replace("/admin");
@@ -50,6 +51,16 @@ export default function AdminLogin() {
           Acceso del organizador
         </h1>
         <Divider />
+        <label htmlFor="adminName">Tu nombre (opcional, para el historial)</label>
+        <input
+          id="adminName"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          maxLength={40}
+          autoComplete="nickname"
+          autoCapitalize="words"
+          placeholder="Ej. Álvaro"
+        />
         <label htmlFor="password">Contraseña</label>
         <input
           id="password"

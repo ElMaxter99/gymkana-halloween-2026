@@ -7,6 +7,7 @@ import { getCurrentPlayer } from "@/lib/player";
 import { formatTime } from "@/lib/format";
 import { countPointsOnRoute, isOffRoute } from "@/lib/overview";
 import { notifyTelegram, scanMessage } from "@/lib/telegram";
+import { notifyScoreChange } from "@/lib/realtime";
 import { qrGoal, SLUG_RE } from "@/lib/validation";
 import { GoldenRule, SuccessSeal, TeamBanner } from "@/components/ui";
 import { Bat, Divider, EnvelopeIcon, PinIcon, UsersIcon } from "@/components/ornaments";
@@ -67,9 +68,19 @@ export default async function QrPointPage({ params }: { params: Promise<{ slug: 
     ),
   );
 
+  // Marcador: la localización de este QR queda «pendiente de validar» en el panel del organizador.
+  // Si falla (p. ej. falta el esquema del marcador), el escaneo ya está guardado y el jugador no lo nota.
+  const { data: pendingLog, error: scoreError } = await supabase.rpc("score_mark_qr", {
+    p_team: player.teamId,
+    p_qr: point.id,
+    p_summary: `${player.teamName} encontró el QR de ${point.title}`,
+  });
+  if (scoreError) console.error("Marcador: no se pudo marcar el QR como pendiente", scoreError.message);
+  else if (pendingLog) after(() => notifyScoreChange(pendingLog as number));
+
   return (
     <main className="page">
-      <TeamBanner playerName={player.displayName} teamName={player.teamName} />
+      <TeamBanner playerName={player.displayName} teamName={player.teamName} teamSlug={player.teamSlug} />
 
       <article className="parchment">
         <header className="point-head">

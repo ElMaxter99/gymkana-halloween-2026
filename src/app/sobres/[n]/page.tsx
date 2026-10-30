@@ -26,8 +26,8 @@ export default async function EnvelopePage({ params }: { params: Promise<{ n: st
           <ArrowLeftIcon size={20} /> Sobres
         </Link>
       </div>
-      <TeamBanner playerName={player.displayName} teamName={player.teamName} />
-      <EnvelopeView envelope={envelope} teamName={player.teamName} scannedQr={scanned} />
+      <TeamBanner playerName={player.displayName} teamName={player.teamName} teamSlug={player.teamSlug} />
+      <EnvelopeView envelope={envelope} teamName={player.teamName} teamSlug={player.teamSlug} scannedQr={scanned} />
       <GoldenRule />
     </main>
   );

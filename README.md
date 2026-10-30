@@ -42,9 +42,10 @@ Una web móvil que acompaña a una gincana de Halloween que se juega en papel: e
 - Los jugadores **escanean un QR, eligen equipo** y desde ese momento el móvil sabe quiénes son.
 - **Los sobres** aparecen en la web cuando el organizador los abre, personalizados para cada equipo: su ruta, su mapa, su nombre dentro de los retos.
 - **Cada QR del parque** muestra la prueba y avisa al organizador al instante (panel en directo y Telegram), indicando si el equipo iba por su ruta o se ha desviado.
+- **Marcador en tiempo real**: el organizador valida las pruebas desde el móvil y la tele de casa (`/tv`) y los móviles (`/marcador`) ven la clasificación moverse al instante.
 - **Ensayos ilimitados**: guardar la partida, empezar de cero y restaurar si algo sale mal.
 
-**Lo que no hace, a propósito.** No valida pruebas, no sube fotos y no lleva la puntuación. Eso sigue siendo cosa del organizador, como en las hojas: *si no hay foto o vídeo… no ha pasado*.
+**Lo que no hace, a propósito.** No sube fotos ni vídeos: las evidencias llegan por WhatsApp y el organizador valida cada prueba a mano en su panel. *Si no hay foto o vídeo… no ha pasado*.
 
 ## 2. Capturas
 
@@ -55,6 +56,14 @@ Una web móvil que acompaña a una gincana de Halloween que se juega en papel: e
 **Panel del organizador:** actividad en directo con filtros y matriz de progreso con rutas («pendiente», «no le toca», «fuera de ruta»).
 
 ![Panel del organizador](docs/capturas/panel.webp)
+
+**Marcador en la tele** (`/tv`): clasificación con animación al cambiar de puesto y lo último que ha pasado.
+
+![Marcador en modo TV](docs/capturas/tv.webp)
+
+**Puntuar desde el móvil** (`/admin/puntos`) y **marcador en el móvil** de los jugadores (`/marcador`).
+
+![Panel de puntuación y marcador en el móvil](docs/capturas/marcador-movil.webp)
 
 **Gestión:** códigos de equipo de un vistazo y apertura de sobres.
 
@@ -104,6 +113,16 @@ Una web móvil que acompaña a una gincana de Halloween que se juega en papel: e
 - **Pantalla de equipo** (`/equipo`): compañeros, ubicaciones, escaneos y actividad.
 - **Si el jugador no está registrado:** al escanear un QR va al registro y después vuelve solo al QR.
 
+### Marcador público (sin login)
+
+- **`/tv`**:
+  - clasificación de los 4 equipos con letra grande y sin scroll;
+  - animación al subir o bajar de puesto y puntos por actividad;
+  - «Lo último» («Bruja completó La Harley +2»);
+  - pantalla siempre encendida (Wake Lock).
+- **`/marcador`**: lo mismo en el móvil, con «¿Cuál es tu equipo?» para resaltarlo.
+- Se actualizan solos en cuanto el organizador marca algo y se reconectan solos. Detalles en **[docs/MARCADOR.md](docs/MARCADOR.md)**.
+
 ### Para el organizador (`/admin`)
 
 | Página | Para qué |
@@ -112,7 +131,9 @@ Una web móvil que acompaña a una gincana de Halloween que se juega en papel: e
 | Equipos y códigos | Ver y editar el código de cada equipo, desbloquear tras intentos fallidos, activar o desactivar equipos |
 | Sobres | Abrir o volver a sellar cada sobre y verlo como lo ve cualquier equipo |
 | Puntos QR | Textos de cada prueba, rutas (a qué equipos les toca), activar o desactivar e **imprimir los QR** |
-| Partidas | Guardar copia y empezar partida nueva, **restaurar una copia** (con copia automática previa), descargas CSV y JSON |
+| **Puntuar** (`/admin/puntos`) | Validar cada prueba por equipo con una mano, bonus automáticos, «más creativa», extras, notas privadas y deshacer |
+| Historial y configuración | Quién cambió qué y cuándo; editar puntos, pruebas, bonus y nombres de equipos; reiniciar con confirmación |
+| Partidas | Guardar copia y empezar partida nueva, **restaurar una copia** (con copia automática previa, incluido el marcador), descargas CSV y JSON |
 | Telegram | Aviso por cada escaneo y jugador nuevo: [docs/TELEGRAM.md](docs/TELEGRAM.md) |
 
 ## 5. Diseño: de la hoja impresa a la pantalla
@@ -147,9 +168,12 @@ flowchart LR
     J --> S["/sobres"]
   end
   O[Organizador] --> A["/admin"]
+  M["/tv · /marcador"] -->|"GET /api/marcador?v="| N
   P & S & A --> N["Next.js 16 en Vercel<br/>(server components, route handlers, server actions)"]
   N -->|service role, solo servidor| DB[(Supabase Postgres<br/>RLS sin políticas)]
   N -.->|"after()"| T[Telegram Bot API]
+  N -.->|aviso «cambio» con la versión| RT[Supabase Realtime]
+  RT -.-> M
 ```
 
 **Decisiones que merece la pena contar:**
@@ -168,7 +192,14 @@ flowchart LR
   - `archive_game()` y `restore_game()` son funciones de Postgres: guardar y borrar, o restaurar, ocurre en una sola transacción.
   - La copia guarda las filas originales, así que al restaurar **los móviles vuelven a estar identificados**.
 - **El contenido es código.** Los sobres están en `src/content/sobres.ts`, tipados y con marcadores (`{EQUIPO}`, `{inicial}`): cambiar de año es editar un archivo.
-- **Sondeo en vez de tiempo real.** Supabase Realtime obligaría a exponer la clave pública con permisos de lectura. El panel consulta una API autenticada cada 5 s, se pausa con la pestaña oculta y se actualiza al volver a ella.
+- **Tiempo real sin exponer datos.**
+  - El marcador escucha en Supabase Realtime un aviso que solo lleva el número de versión, y pide los datos a una API pública cacheada por versión en el CDN.
+  - La clave pública sigue sin poder leer ninguna tabla.
+  - Si el canal se cae, hay sondeo de respaldo y reconexión automática.
+  - El panel de escaneos sigue con su sondeo autenticado cada 5 s.
+- **Puntuación calculada, nunca guardada.**
+  - `computeScores()` es una función pura con tests: total = pruebas válidas + bonus + extras, y los empates comparten puesto.
+  - Cada cambio es una función de Postgres que escribe estado e historial en la misma transacción. Eso permite deshacer de forma fiable.
 
 **Estructura:**
 
@@ -178,26 +209,29 @@ src/
     page.tsx · reglas/ · registro/ · equipo/      Pantallas del jugador
     sobres/ · sobres/[n]/                         Sobres (solo los abiertos)
     p/[slug]/                                     Página de cada QR
-    admin/                                        Panel, equipos, sobres, qr, partidas, login
+    marcador/ · tv/ · api/marcador/               Marcador público (móvil, TV y datos)
+    admin/                                        Panel, puntos (+historial, config), equipos, sobres, qr, partidas, login
     api/                                          register, leave, admin/(login|logout|overview|archives)
     globals.css                                   Sistema visual completo
-  components/  ornaments.tsx · ui.tsx · EnvelopeView.tsx
+  components/  ornaments.tsx · ui.tsx · EnvelopeView.tsx · LiveScoreboard.tsx
   content/     sobres.ts (textos, rutas, localizaciones) · mapas/*.webp
-  lib/         supabase · player · admin-auth · envelopes · overview · telegram · crypto · validation · format
+  lib/         scoring (+ tests) · scoreboard · realtime · useScoreChannel · useLiveScoreboard ·
+               supabase · player · admin-auth · envelopes · overview · telegram · crypto · validation · format
 supabase/schema.sql   Tablas, funciones, RLS, equipos, QR y rutas (re-ejecutable)
-docs/                 TELEGRAM.md · capturas/ · hojas/
+docs/                 MARCADOR.md · TELEGRAM.md · capturas/ · hojas/
 ```
 
 **Modelo de datos:**
 
 | Tabla | Contenido |
 |---|---|
-| `teams` | nombre, código visible (`join_code`) y su hash, intentos fallidos y bloqueo, activo |
+| `teams` | clave fija (`slug`), nombre editable, orden, código visible (`join_code`) y su hash, intentos fallidos y bloqueo, activo |
 | `players` | nombre, equipo, hash del token del móvil, activo |
 | `qr_points` | slug aleatorio, título, prueba, orden, activo, `assigned_team_ids` (ruta) |
 | `scan_events` | jugador, equipo, punto, hora del servidor, user agent |
 | `envelope_state` | sobres abiertos y desde cuándo |
-| `game_archives` | copias de partidas (legible + filas originales) |
+| `game_archives` | copias de partidas (legible + filas originales, incluido el marcador) |
+| `score_*`, `task_results`, `bonus_awards` | marcador: actividades, pruebas, bonus, resultados, extras e historial ([detalle](docs/MARCADOR.md#3-modelo-de-datos)) |
 
 ## 7. Puesta en marcha
 
@@ -215,7 +249,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Comandos: `npm run dev`, `npm run build`, `npm run start` y `npm run typecheck`.
+Comandos: `npm run dev`, `npm run build`, `npm run start`, `npm run typecheck` y `npm test` (tests de puntuación).
 
 ### Variables de entorno
 
@@ -231,9 +265,12 @@ EVENT_TIMEZONE=Europe/Madrid
 MAX_PLAYERS_PER_TEAM=20
 QR_PER_TEAM=2
 SITE_URL=https://tu-dominio.vercel.app   # opcional
+# Marcador en tiempo real: clave PUBLICABLE (pública por diseño; no puede leer tablas)
+NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_xxxxxxxxxxxx
 ```
 
-Ninguna lleva `NEXT_PUBLIC_`: ningún secreto llega al navegador.
+Solo las dos últimas llevan `NEXT_PUBLIC_`: la URL y la clave publicable, que no dan acceso a ningún dato. Ningún secreto llega al navegador.
 
 ### Supabase
 
@@ -257,7 +294,8 @@ Guía completa en **[docs/TELEGRAM.md](docs/TELEGRAM.md)**: crear el bot, conseg
 - [ ] `schema.sql` ejecutado con la última versión y la **clave secreta** configurada.
 - [ ] `/admin/equipos`: códigos puestos (si se usan) y anotados en la hoja de cada equipo.
 - [ ] `/admin/qr`: textos y rutas revisados; **QR impresos desde el dominio definitivo** y probados con iOS y Android.
-- [ ] Ensayo con varios móviles y después `/admin/partidas` → **«Guardar copia y empezar partida nueva»**.
+- [ ] `/tv` en la tele mostrando **● En directo** (si no, faltan las variables `NEXT_PUBLIC_SUPABASE_*`).
+- [ ] Ensayo con varios móviles y después `/admin/partidas` → **«Guardar copia y empezar partida nueva»** (también pone el marcador a 0).
 - [ ] Al empezar: `/admin/sobres` → **abrir el sobre 0**. El resto, a medida que avance la noche.
 - [ ] Si algo se borra por error: `/admin/partidas` → **restaurar** la copia.
 - [ ] Después del evento: descargar el CSV de la partida y borrar los datos personales.
@@ -274,6 +312,7 @@ Guía completa en **[docs/TELEGRAM.md](docs/TELEGRAM.md)**: crear el bot, conseg
 | Reglas | `src/app/reglas/page.tsx` |
 | Colores y tipografías | Variables de `src/app/globals.css` y fuentes en `src/app/layout.tsx` |
 | Objetivo de QR por equipo | `QR_PER_TEAM` |
+| Pruebas, puntos y bonus del marcador | `/admin/puntos/config`, o los datos iniciales al final de `supabase/schema.sql` |
 | Portada y vista previa al compartir | `public/branding/` |
 
 Para empezar limpio: proyecto nuevo de Supabase, ejecutar `schema.sql` y desplegar.
@@ -281,6 +320,20 @@ Para empezar limpio: proyecto nuevo de Supabase, ejecutar `schema.sql` y despleg
 ## 10. Pruebas
 
 Ejecutadas el 30/10/2026 sobre el build de producción (`next build` + `next start`).
+
+- **14 tests unitarios de puntuación** (`npm test`): bonus «todas», «al menos 5» y manual de un solo equipo, rutas QR, pendientes, desactivadas, extras, empates y recálculo.
+- **Marcador, en PostgreSQL 16 real:**
+  - las funciones de puntuación, deshacer (incluido el rechazo si hay un cambio posterior), QR pendiente solo en ruta, reinicio, y partida nueva o restauración con marcador;
+  - `anon` no puede leer las tablas ni ejecutar las funciones.
+- **39 comprobaciones de punta a punta del marcador** con panel, TV (1920×1080 y 1280×720) y móvil abiertos a la vez:
+  - la TV y el móvil se actualizan **sin recargar**: en local, por sondeo, en 3–4 s;
+  - reordenación con animación, empates en el 2.º puesto, «mi equipo» recordado;
+  - deshacer, notas, «más creativa», extras ±, QR → pendiente → válido;
+  - recálculo al cambiar puntos, renombrar equipo, historial con nombre;
+  - nueva partida y restaurar, reinicio con confirmación, API pública sin notas ni motivos;
+  - TV sin scroll y sin errores de consola.
+- **Carga:** 30 clientes simultáneos × 10 rondas contra `/api/marcador` sin caché, 0 errores, mediana de 243 ms.
+- **Pendiente de probar con tu proyecto:** la ruta instantánea de **Supabase Realtime**. En local no hay Realtime, así que las pantallas usaron el sondeo de respaldo.
 
 - **TypeScript y build:** `npm run typecheck` y `npm run build` sin errores ni avisos.
 - **SQL en PostgreSQL 16 real:**

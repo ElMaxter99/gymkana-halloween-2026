@@ -28,7 +28,7 @@ export default async function QrAdminPage() {
       .select("id, slug, title, instructions, sort_order, active, assigned_team_ids")
       .order("sort_order")
       .order("created_at"),
-    db().from("teams").select("id, name").order("created_at"),
+    db().from("teams").select("id, name").order("sort_order").order("created_at"),
   ]);
   if (pointsRes.error) throw pointsRes.error;
   if (teamsRes.error) throw teamsRes.error;

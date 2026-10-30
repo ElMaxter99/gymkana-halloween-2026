@@ -12,6 +12,7 @@ import {
   Pumpkin,
   QrIcon,
   SkullCrossbones,
+  TrophyIcon,
   UsersIcon,
   WaxSeal,
   WebCorner,
@@ -40,7 +41,7 @@ export default async function Home() {
 
       {player ? (
         <>
-          <TeamBanner playerName={player.displayName} teamName={player.teamName} />
+          <TeamBanner playerName={player.displayName} teamName={player.teamName} teamSlug={player.teamSlug} />
           <div className="button-row">
             <Link className="button btn-seal" href="/sobres">
               <EnvelopeIcon /> Vuestros sobres
@@ -63,6 +64,10 @@ export default async function Home() {
           </Link>
         </div>
       )}
+
+      <Link className="button btn-wood" href="/marcador">
+        <TrophyIcon /> Marcador en vivo
+      </Link>
 
       <section className="parchment" id="como-jugar" aria-labelledby="como-jugar-title">
         <h2 id="como-jugar-title">Cómo se juega</h2>

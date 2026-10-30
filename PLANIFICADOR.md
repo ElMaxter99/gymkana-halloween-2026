@@ -62,6 +62,14 @@ RLS activado en todo y sin políticas → solo el servidor (service role) accede
 - [x] Rutas del mapa precargadas en `schema.sql` (editables en `/admin/qr`); «Nueva partida» vuelve a sellar los sobres
 - [x] README reescrito como portfolio y guía para reutilizarlo otros años
 
+### Fase 1e — Marcador en tiempo real ✅
+- [x] Panel `/admin/puntos` (una mano): validar pruebas, bonus, «más creativa», extras, notas y deshacer
+- [x] Historial y configuración (puntos, pruebas, bonus, nombres); reiniciar con confirmación
+- [x] `/tv` y `/marcador` públicos que se actualizan solos (Supabase Realtime + sondeo de respaldo)
+- [x] QR del mapa → «pendiente de validar»; partidas guardan y restauran el marcador
+- [x] Tests de puntuación (`npm test`) y prueba de punta a punta con panel + TV + móvil
+- [ ] Añadir `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` en Vercel y comprobar «● En directo»
+
 ### Fase 2 — Configuración (pendiente, Álvaro)
 - [ ] Usar la clave SECRETA de Supabase (no la publicable) y volver a ejecutar `supabase/schema.sql`
 - [ ] Crear proyecto Supabase y ejecutar `supabase/schema.sql`

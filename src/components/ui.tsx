@@ -1,11 +1,19 @@
 import { AlertIcon, CheckIcon, PentagramIcon, TeamEmblem, WaxSeal } from "./ornaments";
 
 /** «Eres X del equipo Y»: se muestra en todas las pantallas del jugador identificado. */
-export function TeamBanner({ playerName, teamName }: { playerName: string; teamName: string }) {
+export function TeamBanner({
+  playerName,
+  teamName,
+  teamSlug,
+}: {
+  playerName: string;
+  teamName: string;
+  teamSlug?: string | null;
+}) {
   return (
     <div className="team-banner">
       <WaxSeal tone="blood">
-        <TeamEmblem name={teamName} size={34} />
+        <TeamEmblem name={teamName} slug={teamSlug} size={34} />
       </WaxSeal>
       <div>
         <span className="team-banner__who">

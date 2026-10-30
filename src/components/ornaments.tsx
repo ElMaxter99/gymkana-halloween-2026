@@ -259,8 +259,8 @@ function ZombieHand({ size = 40 }: SvgProps) {
   );
 }
 
-export function TeamEmblem({ name, size = 40 }: { name: string; size?: number }) {
-  switch (name.trim().toLowerCase()) {
+export function TeamEmblem({ name, slug, size = 40 }: { name: string; slug?: string | null; size?: number }) {
+  switch ((slug ?? name).trim().toLowerCase()) {
     case "calabaza":
       return <Pumpkin size={size} />;
     case "fantasma":
