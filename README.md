@@ -106,7 +106,7 @@ Una web móvil que acompaña a una gincana de Halloween que se juega en papel: e
 - **Unirse a un equipo** con cuatro tarjetas grandes. El código solo se pide si el organizador se lo ha puesto a ese equipo; es **numérico (4–8 cifras)**, así que el móvil abre directamente el teclado de números.
 - **Un móvil, una identidad.** No se puede registrar dos veces por error; «No soy yo» permite cambiar de equipo sin dejar duplicados.
 - **«Ya me registré»**: si un jugador cambia de móvil (sin batería, otro navegador…), elige su equipo, pone el código y toca su nombre. Conserva sus escaneos y el móvil anterior deja de estar identificado. La lista de nombres solo se ve con el código correcto.
-- **Sobres** (`/sobres`): sellados hasta que el organizador los abre y personalizados con el nombre, la inicial, la ruta y el mapa del equipo.
+- **Sobres** (`/sobres`): sellados hasta que el organizador los abre **o llega su hora programada** (se abren solos en el móvil, sin recargar, y antes muestran «⏰ Se abre a las 22:30»). Personalizados con el nombre, la inicial, la ruta y el mapa del equipo.
 - **QR** (`/p/<slug>`):
   - muestra el equipo, la prueba y el sello «Escaneo registrado» con la hora;
   - indica el progreso: «1 de 2 ubicaciones»;
@@ -130,7 +130,7 @@ Una web móvil que acompaña a una gincana de Halloween que se juega en papel: e
 |---|---|
 | Panel | Contadores, actividad en directo (cada 5 s) con filtros por equipo, jugador y punto, matriz de progreso con rutas, equipos y jugadores |
 | Equipos y códigos | Ver y editar el código de cada equipo (solo cifras, de 4 a 8), desbloquear tras intentos fallidos, activar o desactivar equipos |
-| Sobres | Abrir o volver a sellar cada sobre y verlo como lo ve cualquier equipo |
+| Sobres | Abrir o volver a sellar cada sobre, **programar la hora a la que se abre solo** y verlo como lo ve cualquier equipo |
 | Puntos QR | Textos de cada prueba, rutas (a qué equipos les toca), activar o desactivar e **imprimir los QR** |
 | **Puntuar** (`/admin/puntos`) | Validar cada prueba por equipo con una mano, bonus automáticos, «más creativa», extras, notas privadas y deshacer |
 | Historial y configuración | Quién cambió qué y cuándo; editar puntos, pruebas, bonus y nombres de equipos; reiniciar con confirmación |
@@ -230,7 +230,8 @@ docs/                 MARCADOR.md · TELEGRAM.md · capturas/ · hojas/
 | `players` | nombre, equipo, hash del token del móvil, activo |
 | `qr_points` | slug aleatorio, título, prueba, orden, activo, `assigned_team_ids` (ruta) |
 | `scan_events` | jugador, equipo, punto, hora del servidor, user agent |
-| `envelope_state` | sobres abiertos y desde cuándo |
+| `envelope_state` | sobres abiertos a mano y desde cuándo |
+| `envelope_schedule` | hora de apertura automática de cada sobre (a partir de ella cuenta como abierto) |
 | `game_archives` | copias de partidas (legible + filas originales, incluido el marcador) |
 | `score_*`, `task_results`, `bonus_awards` | marcador: actividades, pruebas, bonus, resultados, extras e historial ([detalle](docs/MARCADOR.md#3-modelo-de-datos)) |
 
@@ -297,7 +298,8 @@ Guía completa en **[docs/TELEGRAM.md](docs/TELEGRAM.md)**: crear el bot, conseg
 - [ ] `/admin/qr`: textos y rutas revisados; **QR impresos desde el dominio definitivo** y probados con iOS y Android.
 - [ ] `/tv` en la tele mostrando **● En directo** (si no, faltan las variables `NEXT_PUBLIC_SUPABASE_*`).
 - [ ] Ensayo con varios móviles y después `/admin/partidas` → **«Guardar copia y empezar partida nueva»** (también pone el marcador a 0).
-- [ ] Al empezar: `/admin/sobres` → **abrir el sobre 0**. El resto, a medida que avance la noche.
+- [ ] `/admin/sobres`: **programar la hora** de cada sobre (por si no te da tiempo a abrirlos a mano). Revisa que pone «⏰ Se abrirá solo…».
+- [ ] Al empezar: abrir el sobre 0 (o dejar que se abra a su hora). El resto, a medida que avance la noche.
 - [ ] Si algo se borra por error: `/admin/partidas` → **restaurar** la copia.
 - [ ] Después del evento: descargar el CSV de la partida y borrar los datos personales.
 

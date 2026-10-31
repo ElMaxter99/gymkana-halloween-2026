@@ -1278,3 +1278,12 @@ tr.is-undone td:last-child, tr.is-undone .tag { text-decoration: none; }
 }
 .teammate input:checked + span { color: var(--cream); background: var(--ink-2); border-color: var(--gold); }
 .teammate input:focus-visible + span { outline: 3px solid var(--pumpkin); outline-offset: 2px; }
+
+/* Apertura programada de sobres */
+.envelope-card__when { display: block; margin-top: 2px; font-size: 0.9rem; font-weight: 700; color: var(--pumpkin); }
+.envelope-admin__scheduled { color: #f2c14e; }
+.envelope-admin__actions { display: grid; gap: 8px; min-width: min(100%, 320px); }
+.envelope-admin__actions form { min-width: 0; }
+.envelope-admin__schedule { display: grid; grid-template-columns: 1fr auto; gap: 6px 8px; align-items: end; }
+.envelope-admin__schedule label { grid-column: 1 / -1; margin: 0; font-size: 0.9rem; color: var(--muted-dark); }
+.envelope-admin__schedule input { min-height: 44px; }

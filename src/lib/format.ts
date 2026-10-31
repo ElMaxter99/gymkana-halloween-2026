@@ -23,3 +23,9 @@ export function formatDateTime(iso: string, timeZone = TIMEZONE): string {
 export function formatHourMinute(iso: string, timeZone = TIMEZONE): string {
   return new Intl.DateTimeFormat("es-ES", { timeZone, hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
 }
+
+/** «31/10 a las 22:30» */
+export function formatDayAndTime(iso: string, timeZone = TIMEZONE): string {
+  const day = new Intl.DateTimeFormat("es-ES", { timeZone, day: "2-digit", month: "2-digit" }).format(new Date(iso));
+  return `${day} a las ${formatHourMinute(iso, timeZone)}`;
+}

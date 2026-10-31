@@ -74,6 +74,13 @@ create table if not exists envelope_state (
   opened_at timestamptz not null default now()
 );
 
+-- Apertura automática de sobres: a partir de «open_at» el sobre cuenta como abierto aunque nadie lo abra a mano.
+-- No hace falta ningún proceso programado: la web lo comprueba cada vez que alguien mira los sobres.
+create table if not exists envelope_schedule (
+  envelope int primary key check (envelope between 0 and 99),
+  open_at timestamptz not null
+);
+
 -- ===== Marcador =====
 -- Configuración (editable en /admin/puntos/config): actividades, pruebas con sus puntos y reglas de bonus.
 create table if not exists score_activities (
@@ -197,6 +204,7 @@ begin
   delete from scan_events where true;
   delete from players where true;
   delete from envelope_state where true; -- la partida nueva empieza con todos los sobres sellados
+  delete from envelope_schedule where open_at <= now(); -- se conservan solo las aperturas programadas futuras
   delete from task_results where true;
   delete from bonus_awards where true;
   delete from score_extras where true;
@@ -488,6 +496,7 @@ alter table qr_points enable row level security;
 alter table scan_events enable row level security;
 alter table game_archives enable row level security;
 alter table envelope_state enable row level security;
+alter table envelope_schedule enable row level security;
 alter table score_activities enable row level security;
 alter table score_tasks enable row level security;
 alter table score_bonuses enable row level security;
@@ -503,7 +512,7 @@ declare r text;
 begin
   foreach r in array array['anon', 'authenticated'] loop
     if exists (select 1 from pg_roles where rolname = r) then
-      execute format('revoke all on teams, players, qr_points, scan_events, game_archives, envelope_state, '
+      execute format('revoke all on teams, players, qr_points, scan_events, game_archives, envelope_state, envelope_schedule, '
         'score_activities, score_tasks, score_bonuses, task_results, bonus_awards, score_extras, score_log from %I', r);
       execute format('revoke all on function archive_game(text), restore_game(bigint), '
         'score_set_task(uuid, uuid, text, text, text, text), score_set_award(uuid, uuid, text, text), '

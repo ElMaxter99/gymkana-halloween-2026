@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentPlayer } from "@/lib/player";
-import { getOpenEnvelopes } from "@/lib/envelopes";
+import { getEnvelopeStatuses } from "@/lib/envelopes";
+import { formatDayAndTime, formatHourMinute } from "@/lib/format";
+import RefreshAt from "@/components/RefreshAt";
 import { ENVELOPES } from "@/content/sobres";
 import { EnvelopeTitle } from "@/components/EnvelopeView";
 import { TeamBanner } from "@/components/ui";
@@ -12,7 +14,16 @@ export const dynamic = "force-dynamic";
 export default async function EnvelopesPage() {
   const player = await getCurrentPlayer();
   if (!player) redirect("/registro");
-  const open = await getOpenEnvelopes();
+  const statuses = await getEnvelopeStatuses();
+  const isOpen = (n: number) => Boolean(statuses.get(n)?.openedAt);
+  const opensAt = (n: number) => (isOpen(n) ? null : (statuses.get(n)?.scheduledAt ?? null));
+  // Próxima apertura programada: a esa hora la página se actualiza sola
+  const nextOpening =
+    ENVELOPES.map((e) => opensAt(e.number))
+      .filter((t): t is string => Boolean(t))
+      .sort()[0] ?? null;
+  const when = (iso: string) =>
+    new Date(iso).getTime() - Date.now() < 20 * 3600_000 ? `a las ${formatHourMinute(iso)}` : `el ${formatDayAndTime(iso)}`;
 
   return (
     <main className="page">
@@ -25,7 +36,8 @@ export default async function EnvelopesPage() {
       <h1 className="title page-title center">
         Vuestros <span className="accent">sobres</span>
       </h1>
-      <p className="center muted small">El organizador os dirá cuándo se abre cada uno.</p>
+      <p className="center muted small">Los sobres se abren cuando lo diga el organizador o al llegar su hora.</p>
+      <RefreshAt at={nextOpening} />
 
       <ul className="envelope-list">
         <li>
@@ -40,7 +52,7 @@ export default async function EnvelopesPage() {
           </Link>
         </li>
         {ENVELOPES.map((e) =>
-          open.has(e.number) ? (
+          isOpen(e.number) ? (
             <li key={e.number}>
               <Link className="envelope-card envelope-card--open" href={`/sobres/${e.number}`}>
                 <WaxSeal tone="gold">{e.number}</WaxSeal>
@@ -59,6 +71,7 @@ export default async function EnvelopesPage() {
                 <span>
                   <span className="label">Sobre {e.number}</span>
                   <b className="envelope-card__title">Sellado</b>
+                  {opensAt(e.number) && <span className="envelope-card__when">⏰ Se abre {when(opensAt(e.number)!)}</span>}
                 </span>
               </div>
             </li>

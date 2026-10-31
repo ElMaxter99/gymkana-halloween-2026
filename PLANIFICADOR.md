@@ -81,7 +81,8 @@ RLS activado en todo y sin políticas → solo el servidor (service role) accede
 ### Fase 3 — Contenido (pendiente)
 - [x] Ubicaciones y textos de los QR (Parkour maldito, Rocódromo, Zigzag, El Anfiteatro)
 - [x] Rutas de los QR según el mapa del muerto (precargadas)
-- [ ] Día del evento: abrir los sobres en `/admin/sobres` a medida que avance la noche
+- [x] Apertura programada de sobres (se abren solos a su hora en los móviles)
+- [ ] Día del evento: programar la hora de cada sobre en `/admin/sobres` (y abrirlos a mano si hace falta)
 - [ ] Imprimir el QR de registro y los de cada punto desde el dominio definitivo
 
 ### Fase 4 — Ensayo general
